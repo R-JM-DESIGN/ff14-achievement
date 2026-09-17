@@ -107,8 +107,15 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
         }
-        .search-input {
+        
+        /* 🌟 [새로 추가] 검색창과 버튼을 가로로 정렬해주는 묶음 스타일 */
+        .search-wrapper {
+            display: flex;
+            gap: 10px;
             width: 100%;
+        }
+        .search-input {
+            flex: 1; /* 👈 인풋창이 최대한 넓은 공간을 차지하도록 유연화 */
             box-sizing: border-box;
             background: #111;
             border: 1px solid var(--border-color);
@@ -121,6 +128,24 @@
         }
         .search-input:focus {
             border-color: var(--accent-color);
+        }
+        
+        /* 🌟 [새로 추가] 우측 Clear 버튼 전용 스타일 */
+        .search-clear-btn {
+            background: #cc444b;
+            color: #fff;
+            border: 1px solid #cc444b;
+            padding: 0 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .search-clear-btn:hover {
+            background: #e63946;
+            border-color: #e63946;
         }
 
         .btn-group {
@@ -177,13 +202,12 @@
             color: #fff;
         }
 
-        /* 🌟 테이블 고정 강제화 레이아웃 배치 */
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             min-width: 1350px;
-            table-layout: fixed; /* 👈 브라우저의 너비 자동 연산 전면 금지 */
+            table-layout: fixed; 
         }
 
         th, td {
@@ -210,31 +234,36 @@
             color: #a0b2d6; 
         }
 
-        /* 🌟 [철벽 정의] 모든 열의 너비를 절대로 흔들리지 않게 고정 가로폭 적용 */
         .col-no { width: 50px; text-align: center; color: #777; font-size: 0.9em; }
         .col-check { width: 60px; text-align: center; }
         
-        /* [아이템] 탭 기준 최상의 정돈감을 보여준 슬림 분류 열 고정폭 잠금 */
         .col-path { 
-            width: 120px; 
+            width: 240px; 
+            min-width: 240px;
+            max-width: 240px;
             text-align: center; 
-            font-size: 0.78em; 
+            font-size: 0.85em; 
             color: #888888; 
-            word-break: break-all;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: clip; 
         }
         tr.completed .col-path { color: #52637a; }
 
         .col-name { 
-            width: 250px; 
+            width: 230px; 
+            min-width: 230px;
+            max-width: 230px;
             font-weight: bold; 
             text-align: center; 
+            word-break: keep-all;
         } 
 
-        /* 긴 조건이 들어와도 분류 칸을 밀지 않고 내부에서 줄바꿈되도록 공간 격리 */
         .col-cond { 
-            width: 500px; 
+            width: auto; 
             font-size: 0.85em; 
             color: #b0b0b0;
+            word-break: break-all;
         }
         tr.completed .col-cond { color: #7d8fa8; }
         
@@ -252,7 +281,6 @@
             text-align: center;  
         }
 
-        /* 머리글(Header)도 중앙 정렬 일치 */
         th.col-no, th.col-check, th.col-path, th.col-name, th.col-cond, th.col-score, th.col-rw-type, th.col-rw-content {
             text-align: center;
         }
@@ -291,7 +319,7 @@
             <div class="progress-bar-bg"><div id="chapter-bar" class="progress-bar-fill" style="background: #2ec4b6;"></div></div>
         </div>
         <div class="progress-box">
-            <div>현재 누적 획득 점수</div>
+            <div>현재 누적 업적 점수</div>
             <div id="score-total" class="score-display-text">0 점</div>
         </div>
     </div>
@@ -300,7 +328,11 @@
 <div class="nav-section">
     <div class="search-box-container">
         <div class="filter-title">🔍 업적 통합 검색</div>
-        <input type="text" id="search-keyword" class="search-input" placeholder="검색할 키워드를 입력하세요..." oninput="handleSearchInput()">
+        <!-- 🌟 [수정] 인풋 창 우측에 동기화되는 onclick="clearSearch()" 버튼 레이아웃 추가 -->
+        <div class="search-wrapper">
+            <input type="text" id="search-keyword" class="search-input" placeholder="검색할 키워드를 입력하세요..." oninput="handleSearchInput()">
+            <button class="search-clear-btn" onclick="clearSearch()">Clear</button>
+        </div>
     </div>
 
     <div class="filter-title">✔️ 완료 여부 필터</div>
