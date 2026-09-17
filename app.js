@@ -29,13 +29,13 @@ async function fetchData() {
 
             return {
                 id: achievementName,    
-                main: getVal(0),        // A열: 대분류
-                sub: getVal(1),         // B열: 소분류
-                name: achievementName,  // C열: 업적명
-                condition: getVal(3),   // D열: 조건
-                score: parsedScore,     // E열: 점수
-                rewardType: getVal(5),  // F열: 보상 종류
-                rewardContent: getVal(6)// G열: 보상 내용
+                main: getVal(0),        
+                sub: getVal(1),         
+                name: achievementName,  
+                condition: getVal(3),   
+                score: parsedScore,     
+                rewardType: getVal(5),  
+                rewardContent: getVal(6)
             };
         }).filter(item => item.name && item.main); 
 
@@ -175,7 +175,6 @@ function getRewardColor(type) {
     }
 }
 
-// 🌟 [수정] 필터링 조건에 따른 동적 분류 열 숨김 및 활성화 로직 적용
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     const thPath = document.getElementById('th-path');
@@ -207,15 +206,13 @@ function renderList() {
         filtered = filtered.filter(item => checkedItems[item.id]);  
     }
 
-    // 🌟 [핵심 변경] 보상 필터 작동 상태이거나 검색 기능 사용 중일 때만 분류 머리글 표시
     const showPathColumn = (currentRewardFilter !== 'ALL' || currentSearchQuery !== '');
     if (showPathColumn) {
-        thPath.style.display = ''; // 켜기
+        thPath.style.display = ''; 
     } else {
-        thPath.style.display = 'none'; // 끄기
+        thPath.style.display = 'none'; 
     }
 
-    // 데이터 미존재 예외 처리 시 colspan 개수 동적 대응
     const activeColspan = showPathColumn ? 8 : 7;
 
     if (filtered.length === 0) {
@@ -230,9 +227,9 @@ function renderList() {
         if(isChecked) tr.classList.add('completed');
 
         const textColor = getRewardColor(item.rewardType);
-
-        // 🌟 [핵심 변경] 분류 열 활성화 조건에 따라 테이블 데이터 행(td) 분기 출력
-        let pathTd = showPathColumn ? `<td class="col-path">${item.main} ＞ ${item.sub}</td>` : '';
+        
+        // 🌟 [수정] 60px 폭에 우아하게 안착하도록 공백을 줄인 '＞' 기호 배정
+        let pathTd = showPathColumn ? `<td class="col-path" title="${item.main} ＞ ${item.sub}">${item.main}＞${item.sub}</td>` : '';
 
         tr.innerHTML = `
             <td class="col-no">${idx + 1}</td> 
