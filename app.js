@@ -1,5 +1,4 @@
 // app.js - Part 1
-// 🌟 사용자님의 실제 구글 웹 앱 주소를 최상단에 영구 고정했습니다.
 const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
@@ -12,7 +11,6 @@ let currentRewardFilter = 'ALL';
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
-// 1. 구글 웹 앱을 통해 CORS 보안을 완벽히 우회하여 데이터 초고속 로드
 async function fetchData() {
     try {
         const res = await fetch(SHEET_URL);
@@ -21,7 +19,6 @@ async function fetchData() {
         const rows = await res.json();
         if (!rows || rows.length <= 1) throw new Error("시트 내부에 파싱할 데이터 행이 부족합니다.");
 
-        // 1만 개 이상의 데이터 구조를 객체 배열로 매핑
         rawData = rows.slice(1).map((row) => {
             const getVal = (colIdx) => {
                 return row[colIdx] !== undefined && row[colIdx] !== null ? String(row[colIdx]).trim() : '';
@@ -31,12 +28,12 @@ async function fetchData() {
             const parsedScore = parseInt(getVal(4).replace(/[^0-9]/g, '')) || 0;
 
             return {
-                id: achievementName,    // 업적명을 고유 키로 고정하여 데이터 추가 시 순서 밀림 완전 방지
+                id: achievementName,    
                 main: getVal(0),        // A열: 대분류
                 sub: getVal(1),         // B열: 소분류
                 name: achievementName,  // C열: 업적명
                 condition: getVal(3),   // D열: 조건
-                score: parsedScore,     // E열: 점수 (정수형 변환 완료)
+                score: parsedScore,     // E열: 점수
                 rewardType: getVal(5),  // F열: 보상 종류
                 rewardContent: getVal(6)// G열: 보상 내용
             };
@@ -48,21 +45,20 @@ async function fetchData() {
     } catch (error) {
         console.error(error);
         document.getElementById('achievement-list').innerHTML = `
-            <tr><td colspan="7" style="text-align: center; color: #ff4d4d; font-weight: bold; padding: 40px;">
+            <tr><td colspan="8" style="text-align: center; color: #ff4d4d; font-weight: bold; padding: 40px;">
                 구글 스프레드시트 데이터를 로드하지 못했습니다.<br>
                 <span style="color: #aaa; font-size: 0.9em; font-weight: normal;">이유: ${error.message}</span>
             </td></tr>`;
     }
 }
 
-// 2. 검색어 입력 인풋 핸들러
 function handleSearchInput() {
     const inputElement = document.getElementById('search-keyword');
     currentSearchQuery = inputElement.value.trim().toLowerCase();
     renderList(); 
 }
 
-// 3. 완료 여부 필터 변경 스위치 함수
+// 상태 필터 제어 함수
 function selectStatusFilter(status) {
     currentStatusFilter = status;
     
@@ -74,7 +70,6 @@ function selectStatusFilter(status) {
     renderList();
 }
 
-// 4. 대분류 / 소분류 메뉴 제어
 function initMenu() {
     const mains = [...new Set(rawData.map(item => item.main))];
     const mainGroup = document.getElementById('main-category-group');
@@ -125,14 +120,13 @@ function selectSubCategory(sub, btn) {
 }
 // app.js - Part 2
 
-// 5. 보상 종류별 모아보기 필터 버튼 동적 생성
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
     const rewardGroup = document.getElementById('reward-category-group');
     rewardGroup.innerHTML = '';
 
     const allBtn = document.createElement('button');
-    allBtn.textContent = '필터 해제'; // 🌟 요청하신 대로 '전체 보상'을 '필터 해제' 문구로 전면 교정 완료!
+    allBtn.textContent = '필터 해제'; 
     allBtn.classList.add('reward-filter-btn', 'active');
     allBtn.id = 'rw-btn-all';
     allBtn.onclick = () => selectRewardFilter('ALL', allBtn);
@@ -168,7 +162,7 @@ function updateRewardFilterActive() {
     if(allBtn) allBtn.classList.add('active');
 }
 
-// 보상 명칭별 글자 색상 자동 분기
+// 보상별 텍스트 색상 분기
 function getRewardColor(type) {
     if (!type || type === '-') return '#888888'; 
     switch (type) {
@@ -183,7 +177,6 @@ function getRewardColor(type) {
     }
 }
 
-// 6. 복합 조건 연산 스코프에 맞춰 업적 리스트 테이블 출력
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     listBody.innerHTML = '';
@@ -215,7 +208,7 @@ function renderList() {
     }
 
     if (filtered.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #888;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #888;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
         calculateChapterProgress([]);
         return;
     }
@@ -230,6 +223,7 @@ function renderList() {
         tr.innerHTML = `
             <td class="col-no">${idx + 1}</td> 
             <td class="col-check"><input type="checkbox" ${isChecked} onchange="toggleItem('${item.id}', this)"></td>
+            <td class="col-path">${item.main} ＞ ${item.sub}</td>
             <td class="col-name">${item.name}</td>
             <td class="col-cond">${item.condition}</td>
             <td class="col-score">${item.score}</td>
@@ -242,7 +236,6 @@ function renderList() {
     calculateChapterProgress(filtered);
 }
 
-// 7. 체크박스 저장 핸들러
 function toggleItem(id, checkbox) {
     const row = checkbox.closest('tr');
     if (checkbox.checked) {
@@ -269,7 +262,6 @@ function toggleItem(id, checkbox) {
     }
 }
 
-// 8. 전체 누적 획득 점수 상자(#score-total) 갱신
 function calculateTotalProgress() {
     const total = rawData.length;
     if(total === 0) return;
