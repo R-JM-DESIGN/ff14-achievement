@@ -63,6 +63,9 @@
             padding: 15px;
             border-radius: 6px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .progress-bar-bg {
             background: #444;
@@ -76,6 +79,14 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
+        }
+
+        /* 🌟 점수 디스플레이 전용 텍스트 스타일 */
+        .score-display-text {
+            font-size: 1.4em;
+            font-weight: 800;
+            margin-top: 5px;
+            color: var(--score-color);
         }
 
         .nav-section {
@@ -233,12 +244,14 @@
 <header>
     <h1>FF14 업적 체크리스트</h1>
     
-    <div class="description-box">
-        <strong>💡 이용 안내</strong><br>
-        - 파이널판타지14의 방대한 업적을 실시간으로 추적하는 대시보드입니다.<br>
-        - 항목을 완료하면 자동으로 연한 파란색 블럭으로 체크되며, 브라우저에 실시간 저장되어 언제든 이어서 확인할 수 있습니다.<br>
-        - 상단의 검색창 및 필터를 통해 원하는 업적과 보상(탈것, 꼬마친구 등)을 빠르게 탐색해 보세요.
-    </div>
+<div class="description-box">
+    <strong>💡 이용 안내</strong><br>
+    - 파이널판타지14의 방대한 업적을 실시간으로 추적하는 대시보드입니다.<br>
+    - 데이터 기준이 되는 견본 사이트는 
+      <!-- 🌟 아래처럼 a 태그를 사용하여 하이퍼링크를 심어줍니다. -->
+      <a href="https://carbuncleplushy.com" target="_blank" style="color: #4ea8de; text-decoration: underline;">Carbuncle Plushy</a> 입니다.<br>
+    - 항목을 완료하면 자동으로 저장되며, 새로고침해도 유지됩니다.
+</div>
 
     <div class="progress-container">
         <div class="progress-box">
@@ -249,9 +262,10 @@
             <div>현재 필터 달성도: <span id="chapter-percent">0%</span> (<span id="chapter-count">0/0</span>)</div>
             <div class="progress-bar-bg"><div id="chapter-bar" class="progress-bar-fill" style="background: #2ec4b6;"></div></div>
         </div>
+        <!-- 🌟 [수정] 목표 한도 수치와 프로그레스 바를 빼고 내 순수 획득 점수만 깔끔하게 노출 -->
         <div class="progress-box">
-            <div>전체 업적 점수 합계: <span id="score-total" style="color: var(--score-color); font-weight: bold;">0</span> / <span id="score-max">0</span> 점</div>
-            <div class="progress-bar-bg"><div id="score-bar" class="progress-bar-fill" style="background: var(--score-color);"></div></div>
+            <div>현재 누적 획득 점수</div>
+            <div id="score-total" class="score-display-text">0 점</div>
         </div>
     </div>
 </header>
@@ -275,7 +289,6 @@
     <div class="filter-title">📂 소분류 선택</div>
     <div id="sub-category-group" class="btn-group"></div>
 
-    <!-- 🌟 [수정] 요청에 따라 타이틀 문구를 간결하게 단축 완료 -->
     <div class="filter-title">🎁 보상 종류별 모아보기</div>
     <div id="reward-category-group" class="btn-group"></div>
 </div>
