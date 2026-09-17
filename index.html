@@ -234,7 +234,6 @@
             color: #a0b2d6; 
         }
 
-        /* 🌟 [수정] 좌우 패딩을 제거하여 NO 글자가 가로로 예쁘게 정렬되도록 조정 */
         .col-no { 
             width: 50px; 
             text-align: center; 
@@ -245,7 +244,7 @@
         }
         .col-check { width: 60px; text-align: center; }
         
-        /* 긴 분류명이 잘리지 않도록 240px 유지 */
+        /* 긴 분류명이 잘리지 않도록 240px 고정 유지 */
         .col-path { 
             width: 240px; 
             min-width: 240px;
@@ -259,15 +258,17 @@
         }
         tr.completed .col-path { color: #52637a; }
 
+        /* 🌟 [너비 재수정] 기존 230px에서 20% 늘려 280px로 여유롭게 확장 완료! */
         .col-name { 
-            width: 230px; 
-            min-width: 230px;
-            max-width: 230px;
+            width: 280px; 
+            min-width: 280px;
+            max-width: 280px;
             font-weight: bold; 
             text-align: center; 
             word-break: keep-all;
         } 
 
+        /* 🌟 [너비 자동 분배] 업적명이 늘어난 공간만큼 남은 영역을 알아서 안전하게 채워 가독성을 유지 */
         .col-cond { 
             width: auto; 
             font-size: 0.85em; 
@@ -317,7 +318,6 @@
       <a href="https://carbuncleplushy.com" target="_blank" style="color: #4ea8de; text-decoration: underline;">질문함</a>으로 보내주세요.<br>
 </div>
 
-
     <div class="progress-container">
         <div class="progress-box">
             <div>전체 달성도: <span id="total-percent">0%</span> (<span id="total-count">0/0</span>)</div>
@@ -338,7 +338,7 @@
     <div class="search-box-container">
         <div class="filter-title">🔍 업적 통합 검색</div>
         <div class="search-wrapper">
-            <input type="text" id="search-keyword" class="search-input" placeholder="검색할 키워드를 입력하세요... (업적명 / 조건 / 보상 종류 / 보상 내용 입력)" oninput="handleSearchInput()">
+            <input type="text" id="search-keyword" class="search-input" placeholder="검색할 키워드를 입력하세요... (업적명 / 조건 / 보상 종류 / 보상 내용)" oninput="handleSearchInput()">
             <button class="search-clear-btn" onclick="clearSearch()">Clear</button>
         </div>
     </div>
