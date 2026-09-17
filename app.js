@@ -1,5 +1,4 @@
 // app.js - Part 1
-// 🌟 깃허브 액션이 매시간 갱신해 두는 100KB짜리 초경량 캐시 파일 주소를 다이렉트로 바라봅니다.
 const SHEET_URL = './data.json'; 
 
 let rawData = [];
@@ -7,15 +6,17 @@ let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {
 
 let currentMain = '';
 let currentSub = '';
-
-// 보상 종류별 다중 토글 중복 선택 배열 정의
 let currentRewardFilters = []; 
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
-// 브라우저 돔 로딩 시 테마 환경 기억 제어 센서 장치
+// 🌟 [속도 혁명 핵심] 한 번에 다 그리지 않고 60개씩 나누어 초고속 로딩을 유도하는 가변 페이징 변수
+let displayLimit = 60; 
+let fullyFilteredItems = []; // 필터링이 완료된 최종 배열을 상시 임시 보관
+
 document.addEventListener("DOMContentLoaded", () => {
     applySavedThemeMode();
+    setupInfiniteScrollSensor(); // 🌟 스크롤 감지 센서 상시 가동
 });
 
 function applySavedThemeMode() {
@@ -105,6 +106,7 @@ function handleSearchInput() {
     const inputElement = document.getElementById('search-keyword');
     if (inputElement) {
         currentSearchQuery = inputElement.value.trim().toLowerCase();
+        displayLimit = 60; // 검색어가 바뀔 때마다 페이징 한계치 초기화
         renderList(); 
     }
 }
@@ -115,12 +117,14 @@ function clearSearch() {
         inputElement.value = ''; 
     }
     currentSearchQuery = ''; 
+    displayLimit = 60;
     updatePathDisplay();
     renderList(); 
 }
 
 function selectStatusFilter(status) {
     currentStatusFilter = status;
+    displayLimit = 60; // 필터 변경 시 초기화
     document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('active'));
     if(status === 'ALL') document.getElementById('status-all').classList.add('active');
     if(status === 'UNCOMPLETED') document.getElementById('status-uncompleted').classList.add('active');
@@ -146,6 +150,7 @@ function initMenu() {
 function selectMainCategory(main, btn) {
     currentMain = main;
     currentRewardFilters = []; 
+    displayLimit = 60;
     updateRewardFilterUI();
 
     document.querySelectorAll('#main-category-group button').forEach(b => b.classList.remove('active'));
@@ -168,6 +173,7 @@ function selectMainCategory(main, btn) {
 function selectSubCategory(sub, btn) {
     currentSub = sub;
     currentRewardFilters = []; 
+    displayLimit = 60;
     updateRewardFilterUI();
     
     document.querySelectorAll('#sub-category-group button').forEach(b => b.classList.remove('active'));
@@ -213,6 +219,7 @@ function selectRewardMultiFilter(type) {
         }
     }
     
+    displayLimit = 60; // 보상 다중 필터 선택 시 페이징 리셋
     updateRewardFilterUI();
     updatePathDisplay();
     renderList();
@@ -220,10 +227,9 @@ function selectRewardMultiFilter(type) {
 
 function updateRewardFilterUI() {
     const allBtn = document.getElementById('rw-btn-all');
-    
     if (currentRewardFilters.length === 0) {
         document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
-        if (allBtn) allBtn.classList.add('active');
+        if (allBtn) allBtn.add('active');
     } else {
         if (allBtn) allBtn.remove('active');
         document.querySelectorAll('.reward-filter-btn').forEach(btn => {
@@ -265,22 +271,23 @@ function getRewardColor(type) {
     }
 }
 
+// 🌟 [초고속 개조] 1만 개 배열 중에서 화면 한계 수치(displayLimit)만큼만 쪼개어 그리는 지능형 렌더러
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     const thPath = document.getElementById('th-path');
     if (!listBody || !thPath) return;
     listBody.innerHTML = '';
 
-    let filtered = [];
+    fullyFilteredItems = [];
     
     if (!currentSearchQuery) {
         if (currentRewardFilters.length === 0) {
-            filtered = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
+            fullyFilteredItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         } else {
-            filtered = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
+            fullyFilteredItems = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
         }
     } else {
-        filtered = rawData.filter(item => {
+        fullyFilteredItems = rawData.filter(item => {
             const nameMatch = item.name.toLowerCase().includes(currentSearchQuery);
             const condMatch = item.condition.toLowerCase().includes(currentSearchQuery);
             const typeMatch = item.rewardType.toLowerCase().includes(currentSearchQuery);
@@ -290,9 +297,9 @@ function renderList() {
     }
 
     if (currentStatusFilter === 'UNCOMPLETED') {
-        filtered = filtered.filter(item => !checkedItems[item.id]); 
+        fullyFilteredItems = fullyFilteredItems.filter(item => !checkedItems[item.id]); 
     } else if (currentStatusFilter === 'COMPLETED') {
-        filtered = filtered.filter(item => checkedItems[item.id]);  
+        fullyFilteredItems = fullyFilteredItems.filter(item => checkedItems[item.id]);  
     }
 
     const showPathColumn = (currentRewardFilters.length > 0 || currentSearchQuery !== '');
@@ -304,13 +311,16 @@ function renderList() {
 
     const activeColspan = showPathColumn ? 8 : 7;
 
-    if (filtered.length === 0) {
+    if (fullyFilteredItems.length === 0) {
         listBody.innerHTML = `<tr><td colspan="${activeColspan}" style="text-align: center; padding: 40px; color: var(--text-color); opacity: 0.6;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
         calculateChapterProgress([]);
         return;
     }
 
-    filtered.forEach((item, idx) => {
+    // 🌟 1만 개 데이터가 있어도 처음엔 딱 displayLimit(60개)만 추출해서 0.01초 만에 화면 잠금 드로잉!
+    const sliceItems = fullyFilteredItems.slice(0, displayLimit);
+
+    sliceItems.forEach((item, idx) => {
         const tr = document.createElement('tr');
         const isChecked = checkedItems[item.id] ? 'checked' : '';
         if(isChecked) tr.classList.add('completed');
@@ -332,11 +342,24 @@ function renderList() {
     });
 
     if (currentSearchQuery || currentRewardFilters.length > 0) {
-        calculateChapterProgress(filtered);
+        calculateChapterProgress(fullyFilteredItems);
     } else {
         const currentViewItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         calculateChapterProgress(currentViewItems);
     }
+}
+
+// 🌟 [신규 강력 이식] 유저가 테이블 휠을 맨 아래로 내릴 때마다 백그라운드에서 다음 60개를 추가로 탑재하는 센서
+function setupInfiniteScrollSensor() {
+    window.addEventListener("scroll", () => {
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 150) {
+            // 보일 수 있는 남은 목록이 더 존재한다면 실행
+            if (displayLimit < fullyFilteredItems.length) {
+                displayLimit += 60; // 한계 수치를 늘리고
+                renderList(); // 화면 스크롤 끊김 없이 부드럽게 연장 추가
+            }
+        }
+    });
 }
 
 function toggleItem(id, checkbox) {
