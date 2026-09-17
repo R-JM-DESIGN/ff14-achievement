@@ -181,7 +181,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 1350px;
+            min-width: 1250px;
         }
 
         th, td {
@@ -211,17 +211,21 @@
         .col-rw-content { width: 170px; font-weight: normal; text-align: center; }
         .col-name { width: 288px; font-weight: bold; text-align: center; } 
         
-        /* 🌟 [너비 수정] 분류 폭을 180px에서 153px로 15% 축소 완료! */
+        /* 🌟 [너비 재수정] 분류의 너비를 153px에서 120px로 과감하게 다듬어 축소 완료! */
         .col-path { 
-            width: 153px; 
+            width: 120px; 
             text-align: center; 
             font-size: 0.85em; 
             color: #888888; 
+            white-space: nowrap; /* 글자가 폭을 넘길 경우 지저분하게 깨지지 않도록 방지 */
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         tr.completed .col-path { color: #52637a; }
 
+        /* 🌟 분류 열이 다이어트를 한 만큼, 여백을 최대로 빨아들여 압도적으로 확장됨 */
         .col-cond { 
-            width: auto; /* 줄어든 분류 열의 너비 여백을 조건 열이 고스란히 흡수 */
+            width: auto; 
             font-size: 0.85em; 
             color: #b0b0b0;
         }
