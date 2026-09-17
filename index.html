@@ -211,6 +211,7 @@
         .col-rw-content { width: 170px; font-weight: normal; text-align: center; }
         .col-name { width: 288px; font-weight: bold; text-align: center; } 
         
+        /* 🌟 분류 열 스타일 설정 */
         .col-path { 
             width: 180px; 
             text-align: center; 
@@ -305,7 +306,8 @@
             <tr>
                 <th class="col-no">NO</th>
                 <th class="col-check">완료</th>
-                <th class="col-path">분류</th>
+                <!-- 🌟 id="th-path"를 부여하여 자바스크립트에서 켜고 끌 수 있게 보정 -->
+                <th id="th-path" class="col-path">분류</th>
                 <th class="col-name">업적명</th>
                 <th class="col-cond">조건</th>
                 <th class="col-score">점수</th>
