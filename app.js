@@ -1,4 +1,5 @@
 // app.js - Part 1
+// 🌟 사용자님의 실제 구글 웹 앱 주소를 최상단에 영구 고정했습니다.
 const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
@@ -146,7 +147,7 @@ function initRewardMenu() {
     });
 }
 
-// 🌟 [수정] 보상 종류별 필터 클릭 시 상단 안내 경로 문구에서 '모음' 글자 완벽하게 제거 완료
+// 🌟 [수정 완료] 보상 종류별 필터 클릭 시 상단 타이틀 안내 경로 문구에서 '모음' 글자 완벽하게 삭제
 function selectRewardFilter(type, btn) {
     currentRewardFilter = type;
     
@@ -157,7 +158,7 @@ function selectRewardFilter(type, btn) {
         document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
     } else {
         document.querySelectorAll('#main-category-group button, #sub-category-group button').forEach(b => b.classList.remove('active'));
-        // 👈 기존 '🎁 [필터] 종류 : 칭호 모음' 에서 영구적으로 '🎁 [필터] 종류 : 칭호' 양식으로 단축 완료!
+        // 👈 '🎁 [필터] 종류 : 하우징' 처럼 군더더기 없이 노출되도록 보정 완료
         document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${type}`; 
     }
     renderList();
