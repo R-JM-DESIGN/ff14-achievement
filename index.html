@@ -50,7 +50,7 @@
             line-height: 1.6;
         }
 
-        /* 질문함 팝업 버튼 링크 스타일 */
+        /* 팝업 링크 디자인 잠금 */
         .tally-popup-link {
             color: #4ea8de;
             text-decoration: underline;
@@ -119,7 +119,6 @@
             border: 1px solid var(--border-color);
         }
         
-        /* 검색창과 버튼 가로 정렬 */
         .search-wrapper {
             display: flex;
             gap: 10px;
@@ -141,7 +140,6 @@
             border-color: var(--accent-color);
         }
         
-        /* 우측 Clear 버튼 전용 스타일 */
         .search-clear-btn {
             background: #cc444b;
             color: #fff;
@@ -255,7 +253,6 @@
         }
         .col-check { width: 60px; text-align: center; }
         
-        /* 240px 분류 너비 고정 규칙 잠금 */
         .col-path { 
             width: 240px; 
             min-width: 240px;
@@ -269,7 +266,6 @@
         }
         tr.completed .col-path { color: #52637a; }
 
-        /* 375px 업적명 가로 너비 포지션 영구 유지 */
         .col-name { 
             width: 375px; 
             min-width: 375px;
@@ -323,8 +319,8 @@
         - 개인 브라우저에 저장되는 사이트입니다. 로그인이 필요하지 않으나, ip 등이 변경될 경우 정보가 사라질 수 있습니다. <br>
         - 컨텐츠에 따라 스포일러가 있을 수 있으니 열람에 주의하십시오. <br>
         - <a href="https://ff14.co.kr" target="_blank" style="color: #4ea8de; text-decoration: underline;">한국 파판14 가이드</a>를 참고하여 제작된 사이트입니다.<br>
-        <!-- 🌟 [수정 완료] 사용자님의 실제 질문함 팝업 키값인 'jaKZA4'를 코드에 빈틈없이 바인딩했습니다. -->
-        - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <span class="tally-popup-link" data-tally-open="jaKZA4" data-tally-emoji-animation="none">질문함</span>으로 보내주세요.<br>
+        <!-- 🌟 [강제 수정] 스크립트가 클릭을 인지하지 못하던 무반응 오류 해결을 위해 <a> 태그와 '#' 이동 무력화(onclick)를 융합했습니다. -->
+        - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <a href="#" class="tally-popup-link" data-tally-open="jaKZA4" data-tally-emoji-animation="none" onclick="return false;">질문함</a>으로 보내주세요.<br>
     </div>
 
     <div class="progress-container">
@@ -355,7 +351,7 @@
     <div class="filter-title">✔️ 완료 여부 필터</div>
     <div class="btn-group">
         <button id="status-all" class="status-filter-btn active" onclick="selectStatusFilter('ALL')">전체 항목 보기</button>
-        <button id="status-uncompleted" class="status-filter-btn" onclick="with status-uncompleted" onclick="selectStatusFilter('UNCOMPLETED')">미완료 항목만 보기</button>
+        <button id="status-uncompleted" class="status-filter-btn" onclick="selectStatusFilter('UNCOMPLETED')">미완료 항목만 보기</button>
         <button id="status-completed" class="status-filter-btn" onclick="selectStatusFilter('COMPLETED')">완료된 항목만 보기</button>
     </div>
 
@@ -396,7 +392,7 @@
     </table>
 </div>
 
-<!-- Tally 팝업 비동기 스크립트 가동 엔진 부착 -->
+<!-- Tally 비동기 위젯 라이브러리 탑재 -->
 <script async src="https://tally.so"></script>
 <script src="app.js"></script>
 </body>
