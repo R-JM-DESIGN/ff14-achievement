@@ -58,7 +58,6 @@ function handleSearchInput() {
     renderList(); 
 }
 
-// 상태 필터 제어 함수
 function selectStatusFilter(status) {
     currentStatusFilter = status;
     
@@ -162,7 +161,6 @@ function updateRewardFilterActive() {
     if(allBtn) allBtn.classList.add('active');
 }
 
-// 보상별 텍스트 색상 분기
 function getRewardColor(type) {
     if (!type || type === '-') return '#888888'; 
     switch (type) {
@@ -177,8 +175,10 @@ function getRewardColor(type) {
     }
 }
 
+// 🌟 [수정] 필터링 조건에 따른 동적 분류 열 숨김 및 활성화 로직 적용
 function renderList() {
     const listBody = document.getElementById('achievement-list');
+    const thPath = document.getElementById('th-path');
     listBody.innerHTML = '';
 
     let filtered = [];
@@ -207,8 +207,19 @@ function renderList() {
         filtered = filtered.filter(item => checkedItems[item.id]);  
     }
 
+    // 🌟 [핵심 변경] 보상 필터 작동 상태이거나 검색 기능 사용 중일 때만 분류 머리글 표시
+    const showPathColumn = (currentRewardFilter !== 'ALL' || currentSearchQuery !== '');
+    if (showPathColumn) {
+        thPath.style.display = ''; // 켜기
+    } else {
+        thPath.style.display = 'none'; // 끄기
+    }
+
+    // 데이터 미존재 예외 처리 시 colspan 개수 동적 대응
+    const activeColspan = showPathColumn ? 8 : 7;
+
     if (filtered.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #888;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="${activeColspan}" style="text-align: center; padding: 40px; color: #888;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
         calculateChapterProgress([]);
         return;
     }
@@ -220,10 +231,13 @@ function renderList() {
 
         const textColor = getRewardColor(item.rewardType);
 
+        // 🌟 [핵심 변경] 분류 열 활성화 조건에 따라 테이블 데이터 행(td) 분기 출력
+        let pathTd = showPathColumn ? `<td class="col-path">${item.main} ＞ ${item.sub}</td>` : '';
+
         tr.innerHTML = `
             <td class="col-no">${idx + 1}</td> 
             <td class="col-check"><input type="checkbox" ${isChecked} onchange="toggleItem('${item.id}', this)"></td>
-            <td class="col-path">${item.main} ＞ ${item.sub}</td>
+            ${pathTd}
             <td class="col-name">${item.name}</td>
             <td class="col-cond">${item.condition}</td>
             <td class="col-score">${item.score}</td>
