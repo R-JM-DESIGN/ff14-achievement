@@ -84,7 +84,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 우측 상단 테마 스위치 버튼 전용 CSS */
+        /* 우측 상단 테마 스위치 버튼 스타일 */
         .theme-switch-container {
             position: absolute;
             top: 20px;
@@ -109,7 +109,7 @@
             background: var(--btn-hover-bg);
         }
 
-        /* 우측 하단 스크롤 추적형 TOP 버튼 전용 CSS */
+        /* 우측 하단 스크롤 추적형 TOP 버튼 스타일 */
         .scroll-top-btn {
             position: fixed;
             bottom: 30px;
@@ -379,13 +379,12 @@
             word-break: keep-all;
         } 
 
-        /* 🌟 [수정 및 분리] 머리글 th에는 상속되지 않도록 td 전용 클래스로 구체화하여 격리 기술 적용 */
+        /* 머리글 th에는 상속되지 않도록 분리 완비 */
         td.col-cond { 
             font-size: 0.85em; 
             color: var(--cond-text-color);
         }
         th.col-cond {
-            /* th 내부의 글자 크기와 굵기가 다른 머리글과 100% 동일하게 유지됩니다. */
             width: auto;
         }
         tr.completed td.col-cond { color: var(--completed-cond-color); }
@@ -412,6 +411,25 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+
+        /* 🌟 [수정 완료] 글자를 컴팩트하게 줄이고, 눈에 안 띄는 연한 회색+투명도 필터링 마감 */
+        footer {
+            max-width: 1500px;
+            margin: 50px auto 30px auto;
+            text-align: center;
+            font-size: 0.72em !important;
+            color: #4a4a4a !important; 
+            line-height: 1.7;
+            letter-spacing: 0.04em;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+            opacity: 0.65;
+            transition: all 0.3s ease;
+        }
+        .footer-highlight {
+            color: #5a5a5a !important;
+            font-weight: 600;
         }
     </style>
 </head>
