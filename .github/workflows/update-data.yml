@@ -5,6 +5,10 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:
 
+# 🌟 [보안 오류 완벽 해결] 봇에게 내 저장소에 파일을 쓸 수 있는 권한을 코드로 직접 강제 주입합니다.
+permissions:
+  contents: write
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
