@@ -7,7 +7,7 @@
     <!-- 프리텐다드(Pretendard) 웹 폰트 로드 -->
     <link rel="stylesheet" as="style" crossorigin href="https://jsdelivr.net" />
     <style>
-        /* 🌟 [기본 다크 모드 색상 변수 정의] */
+        /* [기본 다크 모드 색상 변수 정의] */
         :root {
             --bg-color: #121212;
             --panel-bg: #1e1e1e;
@@ -35,7 +35,7 @@
             --top-btn-text: #ffffff;
         }
 
-        /* 🌟 [라이트 모드 전환 시 교체될 실시간 색상 변수 선언] */
+        /* [라이트 모드 전환 시 교체될 실시간 색상 변수 선언] */
         body.light-mode {
             --bg-color: #f5f7fa;
             --panel-bg: #ffffff;
@@ -70,7 +70,7 @@
             margin: 0;
             padding: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
-            scroll-behavior: smooth; /* 🌟 클릭 시 부드럽게 위로 올라가는 애니메이션 속성 */
+            scroll-behavior: smooth;
         }
 
         header {
@@ -84,7 +84,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 우측 상단 플로팅 테마 스위치 스타일 */
+        /* 우측 상단 테마 스위치 버튼 전용 CSS */
         .theme-switch-container {
             position: absolute;
             top: 20px;
@@ -109,7 +109,7 @@
             background: var(--btn-hover-bg);
         }
 
-        /* 🌟 [새로 추가] 우측 하단 고정 스크롤 추적형 TOP 버튼 스타일 */
+        /* 우측 하단 스크롤 추적형 TOP 버튼 전용 CSS */
         .scroll-top-btn {
             position: fixed;
             bottom: 30px;
@@ -127,19 +127,19 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            opacity: 0; /* 🌟 처음에는 투명하게 숨김 */
+            opacity: 0;
             visibility: hidden;
             pointer-events: none;
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.2s ease;
-            z-index: 999; /* 최상단 레이어 보장 */
+            z-index: 999;
         }
         .scroll-top-btn.show {
-            opacity: 1; /* 🌟 스크롤이 내려가면 활성화 */
+            opacity: 1;
             visibility: visible;
             pointer-events: auto;
         }
         .scroll-top-btn:hover {
-            transform: translateY(-4px); /* 마우스 올리면 살짝 위로 이동 효과 */
+            transform: translateY(-4px);
             filter: brightness(1.1);
         }
 
@@ -379,12 +379,16 @@
             word-break: keep-all;
         } 
 
-        .col-cond { 
-            width: auto; 
+        /* 🌟 [수정 및 분리] 머리글 th에는 상속되지 않도록 td 전용 클래스로 구체화하여 격리 기술 적용 */
+        td.col-cond { 
             font-size: 0.85em; 
             color: var(--cond-text-color);
         }
-        tr.completed .col-cond { color: var(--completed-cond-color); }
+        th.col-cond {
+            /* th 내부의 글자 크기와 굵기가 다른 머리글과 100% 동일하게 유지됩니다. */
+            width: auto;
+        }
+        tr.completed td.col-cond { color: var(--completed-cond-color); }
         
         .col-score { width: 70px; text-align: center; }
         
@@ -408,23 +412,6 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
-        }
-
-        footer {
-            max-width: 1500px;
-            margin: 40px auto 20px auto;
-            text-align: center;
-            font-size: 0.8em;
-            color: #666666; 
-            line-height: 1.6;
-            letter-spacing: 0.03em;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            transition: border-color 0.3s;
-        }
-        .footer-highlight {
-            color: #888888;
-            font-weight: 500;
         }
     </style>
 </head>
@@ -524,11 +511,9 @@
     <div class="footer-highlight">FF14 Achievement © 검력</div>
 </footer>
 
-<!-- 🌟 [새로 추가] 스크롤 유동형 TOP 버튼 태그 배치 -->
 <button id="btn-back-to-top" class="scroll-top-btn" onclick="scrollToTopHead()">▲</button>
 
 <script>
-    // 🌟 [새로 추가] 사용자가 스크롤을 아래로 300px 이상 내리면 TOP 버튼을 서서히 나타나게 제어하는 센서 엔진
     const topButton = document.getElementById("btn-back-to-top");
 
     window.onscroll = function() {
@@ -543,11 +528,10 @@
         }
     }
 
-    // 🌟 [새로 추가] TOP 버튼 클릭 시 최상단 헤드로 리다이렉트 스크롤링해 주는 제어 함수
     function scrollToTopHead() {
         window.scrollTo({
             top: 0,
-            behavior: "smooth" /* 부드러운 스크롤 기동 */
+            behavior: "smooth"
         });
     }
 </script>
