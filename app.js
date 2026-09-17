@@ -11,24 +11,37 @@ let currentRewardFilter = 'ALL';
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
-// 🌟 [새로 추가] 브라우저에 테마 상태를 저장하고 초기 부팅 시 복원하는 실시간 이벤트 핸들러
+// 🌟 [철벽 강화] 페이지가 켜질 때 브라우저에 저장된 테마 모드를 감지하고 무조건 즉시 동기화
 document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("ff14_theme_mode") || "dark";
-    if (savedTheme === "light") {
-        document.body.classList.add("light-mode");
-        document.getElementById("theme-icon").textContent = "☀️";
-        document.getElementById("theme-text").textContent = "라이트 모드";
-    } else {
-        document.body.classList.remove("light-mode");
-        document.getElementById("theme-icon").textContent = "🌙";
-        document.getElementById("theme-text").textContent = "다크 모드";
-    }
+    applySavedThemeMode();
 });
 
+function applySavedThemeMode() {
+    const savedTheme = localStorage.getItem("ff14_theme_mode") || "dark";
+    const body = document.body;
+    const icon = document.getElementById("theme-icon");
+    const text = document.getElementById("theme-text");
+
+    if (!icon || !text) return; // 버튼 요소를 찾지 못하면 예외 안전 처리
+
+    if (savedTheme === "light") {
+        body.classList.add("light-mode");
+        icon.textContent = "☀️";
+        text.textContent = "라이트 모드";
+    } else {
+        body.classList.remove("light-mode");
+        icon.textContent = "🌙";
+        text.textContent = "다크 모드";
+    }
+}
+
+// 🌟 [철벽 강화] index.html의 onclick="toggleThemeMode()" 명령을 강제로 낚아채 정밀 변환 수행
 function toggleThemeMode() {
     const body = document.body;
     const icon = document.getElementById("theme-icon");
     const text = document.getElementById("theme-text");
+
+    if (!icon || !text) return;
 
     if (body.classList.contains("light-mode")) {
         body.classList.remove("light-mode");
@@ -41,6 +54,9 @@ function toggleThemeMode() {
         text.textContent = "라이트 모드";
         localStorage.setItem("ff14_theme_mode", "light");
     }
+    
+    // 테마가 바뀌면 하단 표의 보상 글자 명도 색상도 실시간 전면 리렌더링
+    renderList();
 }
 
 async function fetchData() {
@@ -74,6 +90,7 @@ async function fetchData() {
         initMenu();
         initRewardMenu(); 
         calculateTotalProgress();
+        applySavedThemeMode(); // 데이터 수신 완료 시점에 테마 한 번 더 검증 안착
     } catch (error) {
         console.error(error);
         document.getElementById('achievement-list').innerHTML = `
@@ -210,22 +227,21 @@ function updateRewardFilterActive() {
     if(allBtn) allBtn.classList.add('active');
 }
 
-// 🌟 [라이트 모드 대응 조율] 흰 배경에서도 보상 종류 명칭이 흐려지지 않게 최적 가시 명도값 세팅
+// 🌟 [라이트 대응 핵심 교정] 흰 배경(라이트 모드)에서도 보상 글자가 흐릿하게 묻히지 않도록 최적 명도 컬러 매핑
 function getRewardColor(type) {
     if (!type || type === '-') return '#666666'; 
     
-    // 현재 라이트 모드가 켜져있는지 스코프 판별
     const isLight = document.body.classList.contains("light-mode");
     
     switch (type) {
-        case '탈것': return isLight ? '#c71585' : '#ff70a6';      
-        case '꼬마친구': return isLight ? '#0077b6' : '#4ea8de';    
-        case '칭호': return isLight ? '#d97706' : '#ff9f1c';      
-        case '장비': return isLight ? '#86198f' : '#b5179e';      
-        case '가구': return isLight ? '#38a169' : '#70e000';      
-        case '초코보 갑주': return isLight ? '#b45309' : '#ffd166';  
-        case '오케스트리온': return isLight ? '#0369a1' : '#48cae4'; 
-        default: return isLight ? '#0f766e' : '#5bc0be';         
+        case '탈것': return isLight ? '#b80061' : '#ff70a6';      
+        case '꼬마친구': return isLight ? '#0066cc' : '#4ea8de';    
+        case '칭호': return isLight ? '#b55d00' : '#ff9f1c';      
+        case '장비': return isLight ? '#7209b7' : '#b5179e';      
+        case '가구': return isLight ? '#2d6a4f' : '#70e000';      
+        case '초코보 갑주': return isLight ? '#995a00' : '#ffd166';  
+        case '오케스트리온': return isLight ? '#0077b6' : '#48cae4'; 
+        default: return isLight ? '#14746f' : '#5bc0be';         
     }
 }
 
