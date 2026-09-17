@@ -7,11 +7,12 @@ let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {
 
 let currentMain = '';
 let currentSub = '';
-let currentRewardFilter = 'ALL'; 
+
+// 🌟 [핵심 변경] 단일 문자열 변수에서 선택된 보상들을 담는 '배열(Array)' 구조로 전면 업그레이드
+let currentRewardFilters = []; 
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
-// 🌟 [철벽 강화] 페이지가 켜질 때 브라우저에 저장된 테마 모드를 감지하고 무조건 즉시 동기화
 document.addEventListener("DOMContentLoaded", () => {
     applySavedThemeMode();
 });
@@ -22,7 +23,7 @@ function applySavedThemeMode() {
     const icon = document.getElementById("theme-icon");
     const text = document.getElementById("theme-text");
 
-    if (!icon || !text) return; // 버튼 요소를 찾지 못하면 예외 안전 처리
+    if (!icon || !text) return;
 
     if (savedTheme === "light") {
         body.classList.add("light-mode");
@@ -35,7 +36,6 @@ function applySavedThemeMode() {
     }
 }
 
-// 🌟 [철벽 강화] index.html의 onclick="toggleThemeMode()" 명령을 강제로 낚아채 정밀 변환 수행
 function toggleThemeMode() {
     const body = document.body;
     const icon = document.getElementById("theme-icon");
@@ -54,8 +54,6 @@ function toggleThemeMode() {
         text.textContent = "라이트 모드";
         localStorage.setItem("ff14_theme_mode", "light");
     }
-    
-    // 테마가 바뀌면 하단 표의 보상 글자 명도 색상도 실시간 전면 리렌더링
     renderList();
 }
 
@@ -90,7 +88,7 @@ async function fetchData() {
         initMenu();
         initRewardMenu(); 
         calculateTotalProgress();
-        applySavedThemeMode(); // 데이터 수신 완료 시점에 테마 한 번 더 검증 안착
+        applySavedThemeMode();
     } catch (error) {
         console.error(error);
         document.getElementById('achievement-list').innerHTML = `
@@ -115,26 +113,18 @@ function clearSearch() {
         inputElement.value = ''; 
     }
     currentSearchQuery = ''; 
-    
-    if (currentRewardFilter === 'ALL') {
-        document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
-    } else {
-        document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${currentRewardFilter}`;
-    }
+    updatePathDisplay();
     renderList(); 
 }
 
 function selectStatusFilter(status) {
     currentStatusFilter = status;
-    
     document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('active'));
     if(status === 'ALL') document.getElementById('status-all').classList.add('active');
     if(status === 'UNCOMPLETED') document.getElementById('status-uncompleted').classList.add('active');
     if(status === 'COMPLETED') document.getElementById('status-completed').classList.add('active');
-
     renderList();
 }
-// app.js - Part 2
 
 function initMenu() {
     const mains = [...new Set(rawData.map(item => item.main))];
@@ -153,8 +143,8 @@ function initMenu() {
 
 function selectMainCategory(main, btn) {
     currentMain = main;
-    currentRewardFilter = 'ALL'; 
-    updateRewardFilterActive();
+    currentRewardFilters = []; // 🌟 대분류 선택 시 보상 다중 필터 초기화
+    updateRewardFilterUI();
 
     document.querySelectorAll('#main-category-group button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -175,15 +165,16 @@ function selectMainCategory(main, btn) {
 
 function selectSubCategory(sub, btn) {
     currentSub = sub;
-    currentRewardFilter = 'ALL';
-    updateRewardFilterActive();
+    currentRewardFilters = []; // 🌟 소분류 선택 시 보상 다중 필터 초기화
+    updateRewardFilterUI();
     
     document.querySelectorAll('#sub-category-group button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
+    updatePathDisplay();
     renderList();
 }
+// app.js - Part 2
 
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
@@ -194,45 +185,79 @@ function initRewardMenu() {
     allBtn.textContent = '필터 해제'; 
     allBtn.classList.add('reward-filter-btn', 'active');
     allBtn.id = 'rw-btn-all';
-    allBtn.onclick = () => selectRewardFilter('ALL', allBtn);
+    allBtn.onclick = () => selectRewardMultiFilter('ALL');
     rewardGroup.appendChild(allBtn);
 
     rewardTypes.forEach(type => {
         const btn = document.createElement('button');
         btn.textContent = type; 
         btn.classList.add('reward-filter-btn');
-        btn.onclick = () => selectRewardFilter(type, btn);
+        btn.setAttribute('data-reward-type', type);
+        btn.onclick = () => selectRewardMultiFilter(type);
         rewardGroup.appendChild(btn);
     });
 }
 
-function selectRewardFilter(type, btn) {
-    currentRewardFilter = type;
-    
-    document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
+// 🌟 [핵심 신규 추가] 보상을 누를 때마다 배열에 넣고 빼는 중복 토글 알고리즘 가동
+function selectRewardMultiFilter(type) {
     if (type === 'ALL') {
-        document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
+        currentRewardFilters = []; // 필터 해제 버튼 클릭 시 배열 비우기
     } else {
-        document.querySelectorAll('#main-category-group button, #sub-category-group button').forEach(b => b.classList.remove('active'));
-        document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${type}`; 
+        const index = currentRewardFilters.indexOf(type);
+        if (index > -1) {
+            currentRewardFilters.splice(index, 1); // 이미 켜져있으면 배열에서 제거 (해제)
+        } else {
+            currentRewardFilters.push(type); // 꺼져있으면 배열에 추가 (중복 선택)
+            
+            // 보상 필터가 하나라도 켜지면 대/소분류 탭 상단 불빛은 단정하게 해제
+            document.querySelectorAll('#main-category-group button, #sub-category-group button').forEach(b => b.classList.remove('active'));
+        }
     }
+    
+    updateRewardFilterUI();
+    updatePathDisplay();
     renderList();
 }
 
-function updateRewardFilterActive() {
-    document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
+// 🌟 [핵심 신규 추가] 현재 배열 상태를 분석하여 불빛(active) 클래스를 실시간 분배하는 UI 동기화 함수
+function updateRewardFilterUI() {
     const allBtn = document.getElementById('rw-btn-all');
-    if(allBtn) allBtn.classList.add('active');
+    
+    if (currentRewardFilters.length === 0) {
+        // 켜진 필터가 없으면 '필터 해제'에 불빛 점등
+        document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
+        if (allBtn) allBtn.classList.add('active');
+    } else {
+        if (allBtn) allBtn.classList.remove('active');
+        // 배열에 이름이 있는 보상 단추들만 찾아서 active 불빛 점등
+        document.querySelectorAll('.reward-filter-btn').forEach(btn => {
+            const type = btn.getAttribute('data-reward-type');
+            if (currentRewardFilters.includes(type)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
 }
 
-// 🌟 [라이트 대응 핵심 교정] 흰 배경(라이트 모드)에서도 보상 글자가 흐릿하게 묻히지 않도록 최적 명도 컬러 매핑
+// 🌟 [핵심 신규 추가] 중복 선택된 카테고리 현황을 상단 텍스트바에 이쁘게 출력해주는 장치
+function updatePathDisplay() {
+    const display = document.getElementById('current-path-display');
+    if (!display) return;
+
+    if (currentSearchQuery) {
+        display.textContent = `🔍 전체 항목 중에서 '${currentSearchQuery}' 검색 결과`;
+    } else if (currentRewardFilters.length > 0) {
+        display.textContent = `🎁 [다중 필터] 종류 : ${currentRewardFilters.join(', ')}`;
+    } else {
+        display.textContent = `${currentMain} ＞ ${currentSub}`;
+    }
+}
+
 function getRewardColor(type) {
     if (!type || type === '-') return '#666666'; 
-    
     const isLight = document.body.classList.contains("light-mode");
-    
     switch (type) {
         case '탈것': return isLight ? '#b80061' : '#ff70a6';      
         case '꼬마친구': return isLight ? '#0066cc' : '#4ea8de';    
@@ -248,15 +273,18 @@ function getRewardColor(type) {
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     const thPath = document.getElementById('th-path');
+    if (!listBody || !thPath) return;
     listBody.innerHTML = '';
 
     let filtered = [];
     
     if (!currentSearchQuery) {
-        if (currentRewardFilter === 'ALL') {
+        if (currentRewardFilters.length === 0) {
+            // 보상 필터가 없으면 대분류 + 소분류 매칭 조회
             filtered = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         } else {
-            filtered = rawData.filter(item => item.rewardType === currentRewardFilter);
+            // 🌟 [수정] 내 시트 데이터의 보상 종류가 currentRewardFilters 배열에 '하나라도 포함(Includes)'되어 있다면 매칭 통과 처리
+            filtered = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
         }
     } else {
         filtered = rawData.filter(item => {
@@ -266,8 +294,6 @@ function renderList() {
             const rewardMatch = item.rewardContent.toLowerCase().includes(currentSearchQuery);
             return nameMatch || condMatch || typeMatch || rewardMatch;
         });
-        
-        document.getElementById('current-path-display').textContent = `🔍 전체 항목 중에서 '${currentSearchQuery}' 검색 결과 (총 ${filtered.length}건)`;
     }
 
     if (currentStatusFilter === 'UNCOMPLETED') {
@@ -276,7 +302,8 @@ function renderList() {
         filtered = filtered.filter(item => checkedItems[item.id]);  
     }
 
-    const showPathColumn = (currentRewardFilter !== 'ALL' || currentSearchQuery !== '');
+    // 🌟 보상 다중 필터가 하나라도 켜져있거나 검색 상태일 때 '분류' 헤더 열 정밀 노출
+    const showPathColumn = (currentRewardFilters.length > 0 || currentSearchQuery !== '');
     if (showPathColumn) {
         thPath.style.display = ''; 
     } else {
@@ -312,7 +339,13 @@ function renderList() {
         listBody.appendChild(tr);
     });
 
-    calculateChapterProgress(filtered);
+    // 만약 보상 다중 필터 상태이거나 검색 상태라면 하단 진행바 분모 개수 자동 리컴퓨팅 연계
+    if (currentSearchQuery || currentRewardFilters.length > 0) {
+        calculateChapterProgress(filtered);
+    } else {
+        const currentViewItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
+        calculateChapterProgress(currentViewItems);
+    }
 }
 
 function toggleItem(id, checkbox) {
@@ -328,15 +361,10 @@ function toggleItem(id, checkbox) {
     localStorage.setItem('ff14_achievements_v2', JSON.stringify(checkedItems));
     calculateTotalProgress();
 
-    if (currentStatusFilter !== 'ALL' || currentSearchQuery) {
+    if (currentStatusFilter !== 'ALL' || currentSearchQuery || currentRewardFilters.length > 0) {
         renderList();
     } else {
-        let currentViewItems = [];
-        if (currentRewardFilter === 'ALL') {
-            currentViewItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
-        } else {
-            currentViewItems = rawData.filter(item => item.rewardType === currentRewardFilter);
-        }
+        const currentViewItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         calculateChapterProgress(currentViewItems);
     }
 }
@@ -361,7 +389,7 @@ function calculateChapterProgress(currentItems) {
     
     if (currentSearchQuery) {
         document.getElementById('chapter-percent').parentElement.firstChild.textContent = "현재 검색 항목 달성도: ";
-    } else if (currentRewardFilter !== 'ALL') {
+    } else if (currentRewardFilters.length > 0) {
         document.getElementById('chapter-percent').parentElement.firstChild.textContent = "선택 보상 달성도: ";
     } else {
         document.getElementById('chapter-percent').parentElement.firstChild.textContent = "현재 소분류 달성도: ";
