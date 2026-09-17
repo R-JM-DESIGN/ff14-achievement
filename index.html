@@ -211,9 +211,9 @@
         .col-rw-content { width: 170px; font-weight: normal; text-align: center; }
         .col-name { width: 288px; font-weight: bold; text-align: center; } 
         
-        /* 🌟 분류 열 스타일 설정 */
+        /* 🌟 [너비 수정] 분류 폭을 180px에서 153px로 15% 축소 완료! */
         .col-path { 
-            width: 180px; 
+            width: 153px; 
             text-align: center; 
             font-size: 0.85em; 
             color: #888888; 
@@ -221,7 +221,7 @@
         tr.completed .col-path { color: #52637a; }
 
         .col-cond { 
-            width: auto; 
+            width: auto; /* 줄어든 분류 열의 너비 여백을 조건 열이 고스란히 흡수 */
             font-size: 0.85em; 
             color: #b0b0b0;
         }
@@ -306,7 +306,6 @@
             <tr>
                 <th class="col-no">NO</th>
                 <th class="col-check">완료</th>
-                <!-- 🌟 id="th-path"를 부여하여 자바스크립트에서 켜고 끌 수 있게 보정 -->
                 <th id="th-path" class="col-path">분류</th>
                 <th class="col-name">업적명</th>
                 <th class="col-cond">조건</th>
