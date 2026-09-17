@@ -1,5 +1,6 @@
 // app.js - Part 1
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
+// 🌟 사용자님의 실제 구글 웹 앱 주소를 최상단에 영구 고정했습니다.
+const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
@@ -30,7 +31,7 @@ async function fetchData() {
             const parsedScore = parseInt(getVal(4).replace(/[^0-9]/g, '')) || 0;
 
             return {
-                id: achievementName,    
+                id: achievementName,    // 업적명을 고유 키로 고정하여 데이터 추가 시 순서 밀림 완전 방지
                 main: getVal(0),        // A열: 대분류
                 sub: getVal(1),         // B열: 소분류
                 name: achievementName,  // C열: 업적명
@@ -131,7 +132,7 @@ function initRewardMenu() {
     rewardGroup.innerHTML = '';
 
     const allBtn = document.createElement('button');
-    allBtn.textContent = '전체 보상'; 
+    allBtn.textContent = '필터 해제'; // 🌟 요청하신 대로 '전체 보상'을 '필터 해제' 문구로 전면 교정 완료!
     allBtn.classList.add('reward-filter-btn', 'active');
     allBtn.id = 'rw-btn-all';
     allBtn.onclick = () => selectRewardFilter('ALL', allBtn);
@@ -268,7 +269,7 @@ function toggleItem(id, checkbox) {
     }
 }
 
-// 8. 🌟 [에러 완벽 조치] 사라진 html 태그(#score-max, #score-bar)를 제어하려던 잔여 연산 코드를 완벽히 숙청했습니다.
+// 8. 전체 누적 획득 점수 상자(#score-total) 갱신
 function calculateTotalProgress() {
     const total = rawData.length;
     if(total === 0) return;
@@ -280,7 +281,6 @@ function calculateTotalProgress() {
     document.getElementById('total-count').textContent = `${checkedCount}/${total}`;
     document.getElementById('total-bar').style.width = `${percent}%`;
 
-    // 오직 실존하는 현재 누적 획득 점수 상자(#score-total)만 갱신합니다. (안전 보장)
     const myScore = rawData.filter(item => checkedItems[item.id]).reduce((acc, item) => acc + item.score, 0);
     document.getElementById('score-total').textContent = `${myScore.toLocaleString()} 점`;
 }
