@@ -177,17 +177,21 @@
             color: #fff;
         }
 
+        /* 🌟 [수정] 테이블 전체 레이아웃을 고정형(fixed)으로 변경하여 유동적인 변화 차단 */
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 1250px;
+            min-width: 1350px;
+            table-layout: fixed; /* 👈 브라우저의 임의 너비 계산 기능을 전면 무력화 */
         }
 
         th, td {
             padding: 14px 20px;
             border-bottom: 1px solid var(--border-color);
             transition: background-color 0.2s ease, color 0.2s ease;
+            box-sizing: border-box;
+            overflow: hidden; /* 칸 밖으로 탈출하는 글자 보호 */
         }
 
         th {
@@ -205,40 +209,63 @@
             color: #a0b2d6; 
         }
 
-        .col-no { width: 40px; text-align: center; color: #777; font-size: 0.9em; padding-left: 10px; padding-right: 10px; }
-        .col-check { width: 50px; text-align: center; padding-left: 5px; padding-right: 5px; }
-        .col-score { width: 70px; text-align: center; }
-        .col-rw-content { width: 170px; font-weight: normal; text-align: center; }
-        .col-name { width: 288px; font-weight: bold; text-align: center; } 
+        /* 🌟 [수정] 모든 열의 너비를 min, max, 기본 width까지 삼중으로 픽셀 단위 완전 철벽 고정 */
+        .col-no { width: 60px; min-width: 60px; max-width: 60px; text-align: center; color: #777; font-size: 0.9em; }
+        .col-check { width: 70px; min-width: 70px; max-width: 70px; text-align: center; }
         
-        /* 🌟 [너비 극대화 축소] 분류 폭을 120px에서 60px로 줄이고 글자 크기를 더 콤팩트하게 다듬음 */
+        /* [아이템] 화면에서 가장 예뻤던 60px 아담한 분류 너비 완전 잠금 */
         .col-path { 
-            width: 60px; 
+            width: 110px; 
+            min-width: 110px; 
+            max-width: 110px; 
             text-align: center; 
-            font-size: 0.78em; /* 👈 작은 크기로 정돈하여 한눈에 정렬 보장 */
+            font-size: 0.78em; 
             color: #888888; 
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding-left: 5px;
-            padding-right: 5px;
         }
         tr.completed .col-path { color: #52637a; }
 
-        /* 분류 열이 60px로 초슬림해진 만큼 모든 여백 공간을 빨아들여 극대화 확장 */
+        .col-name { 
+            width: 280px; 
+            min-width: 280px; 
+            max-width: 280px; 
+            font-weight: bold; 
+            text-align: center; 
+            word-break: keep-all; /* 단어단위 줄바꿈 */
+        } 
+
+        /* 긴 칭호 조건이 와도 옆 칸을 절대 밀어내지 못하도록 470px로 단단히 격리 고정 */
         .col-cond { 
-            width: auto; 
+            width: 470px; 
+            min-width: 470px; 
+            max-width: 470px; 
             font-size: 0.85em; 
             color: #b0b0b0;
+            word-break: break-all; /* 칸 크기를 넘치면 다음줄로 자동 인계 */
         }
         tr.completed .col-cond { color: #7d8fa8; }
+
+        .col-score { width: 80px; min-width: 80px; max-width: 80px; text-align: center; }
         
         .col-rw-type { 
-            width: 104px; 
+            width: 110px; 
+            min-width: 110px; 
+            max-width: 110px; 
             font-weight: bold;
             text-align: center; 
         }
         
+        .col-rw-content { 
+            width: 170px; 
+            min-width: 170px; 
+            max-width: 170px; 
+            font-weight: normal; 
+            text-align: center; 
+            word-break: keep-all;
+        }
+
         th.col-no, th.col-check, th.col-path, th.col-name, th.col-cond, th.col-score, th.col-rw-type, th.col-rw-content {
             text-align: center;
         }
@@ -266,7 +293,6 @@
       <a href="https://carbuncleplushy.com" target="_blank" style="color: #4ea8de; text-decoration: underline;">질문함</a>으로 보내주세요.<br>
 </div>
 
-
     <div class="progress-container">
         <div class="progress-box">
             <div>전체 달성도: <span id="total-percent">0%</span> (<span id="total-count">0/0</span>)</div>
@@ -277,7 +303,7 @@
             <div class="progress-bar-bg"><div id="chapter-bar" class="progress-bar-fill" style="background: #2ec4b6;"></div></div>
         </div>
         <div class="progress-box">
-            <div>획득 업적 점수</div>
+            <div>현재 업적 점수</div>
             <div id="score-total" class="score-display-text">0 점</div>
         </div>
     </div>
