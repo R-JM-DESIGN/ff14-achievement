@@ -50,6 +50,17 @@
             line-height: 1.6;
         }
 
+        /* 🌟 [새로 추가] 질문함 팝업 버튼으로 쓰일 글자에 마우스를 대면 손가락 커서와 불빛이 들어오게 보정 */
+        .tally-popup-link {
+            color: #4ea8de;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .tally-popup-link:hover {
+            color: #3a86ff;
+        }
+
         .progress-container {
             display: flex;
             gap: 20px;
@@ -108,7 +119,6 @@
             border: 1px solid var(--border-color);
         }
         
-        /* 검색창과 버튼을 가로로 정렬해주는 묶음 스타일 */
         .search-wrapper {
             display: flex;
             gap: 10px;
@@ -130,7 +140,6 @@
             border-color: var(--accent-color);
         }
         
-        /* 우측 Clear 버튼 전용 스타일 */
         .search-clear-btn {
             background: #cc444b;
             color: #fff;
@@ -244,7 +253,6 @@
         }
         .col-check { width: 60px; text-align: center; }
         
-        /* 240px 분류 너비 고정 */
         .col-path { 
             width: 240px; 
             min-width: 240px;
@@ -258,17 +266,15 @@
         }
         tr.completed .col-path { color: #52637a; }
 
-        /* 🌟 [너비 추가 확장] 기존 325px에서 약 15% 더 확보하여 '375px'로 시원하게 설정 완료! */
         .col-name { 
-            width: 375px; 
-            min-width: 375px;
-            max-width: 375px;
+            width: 325px; 
+            min-width: 325px;
+            max-width: 325px;
             font-weight: bold; 
             text-align: center; 
             word-break: keep-all;
         } 
 
-        /* 🌟 업적명이 넓어진 여백만큼 상쇄되어 가로폭 아웃라인의 균형을 완벽 유지합니다 */
         .col-cond { 
             width: auto; 
             font-size: 0.85em; 
@@ -313,7 +319,8 @@
         - 개인 브라우저에 저장되는 사이트입니다. 로그인이 필요하지 않으나, ip 등이 변경될 경우 정보가 사라질 수 있습니다. <br>
         - 컨텐츠에 따라 스포일러가 있을 수 있으니 열람에 주의하십시오. <br>
         - <a href="https://ff14.co.kr" target="_blank" style="color: #4ea8de; text-decoration: underline;">한국 파판14 가이드</a>를 참고하여 제작된 사이트입니다.<br>
-        - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <a href="https://carbuncleplushy.com" target="_blank" style="color: #4ea8de; text-decoration: underline;">질문함</a>으로 보내주세요.<br>
+        <!-- 🌟 [수정] '질문함' 텍스트를 클릭하면 복제해오신 전용 라이브러리를 통해 화면에 팝업창이 오버레이되도록 셋업 완료 -->
+        - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <span class="tally-popup-link" data-tally-open="3qDpEY" data-tally-emoji-animation="none">질문함</span>으로 보내주세요.<br>
     </div>
 
     <div class="progress-container">
@@ -322,7 +329,7 @@
             <div class="progress-bar-bg"><div id="total-bar" class="progress-bar-fill"></div></div>
         </div>
         <div class="progress-box">
-            <div>현재 필터 달성도: <span id="chapter-percent">0%</span> (<span id="chapter-count">0/0</span>)</div>
+            <div>current 필터 달성도: <span id="chapter-percent">0%</span> (<span id="chapter-count">0/0</span>)</div>
             <div class="progress-bar-bg"><div id="chapter-bar" class="progress-bar-fill" style="background: #2ec4b6;"></div></div>
         </div>
         <div class="progress-box">
@@ -377,7 +384,6 @@
             <tr>
                 <td colspan="8" style="text-align: center; padding: 60px;">
                     <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(250,250,250,0.1); border-radius: 50%; border-top-color: #3a86ff; animation: spin 1s ease-in-out infinite; margin-bottom: 15px;"></div>
-                    <!-- 🌟 [수정] 요청하신 문구 양식인 '최신 업적 데이터를 실시간 동기화 중입니다...' 로 단축 완료 -->
                     <div style="color: #aaa; font-size: 0.95em; font-weight: 500;">최신 업적 데이터를 실시간 동기화 중입니다...</div>
                     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
                 </td>
@@ -386,6 +392,8 @@
     </table>
 </div>
 
+<!-- 🌟 [수정] 주신 Tally 위젯 비동기 엔진 스크립트를 최하단에 정확히 이식하여 상시 트리거 대기시킵니다. -->
+<script async src="https://tally.so/widgets/embed.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
