@@ -1,5 +1,5 @@
 // app.js - Part 1
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
+const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
@@ -175,6 +175,7 @@ function getRewardColor(type) {
     }
 }
 
+// 🌟 [교정 완료] 분류 열이 켜지고 꺼질 때 빈 깡통 td가 채워져 규격을 깨뜨리지 않도록 철저히 바인딩 제어
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     const thPath = document.getElementById('th-path');
@@ -228,9 +229,10 @@ function renderList() {
 
         const textColor = getRewardColor(item.rewardType);
         
-        // 🌟 [수정] 60px 폭에 우아하게 안착하도록 공백을 줄인 '＞' 기호 배정
-        let pathTd = showPathColumn ? `<td class="col-path" title="${item.main} ＞ ${item.sub}">${item.main}＞${item.sub}</td>` : '';
+        // 🌟 [교정] 분류 숨김 상태일 때는 빈 자리에 빈 td가 아니라 태그를 아예 제외하고, 활성화 상태일 때는 정확히 class="col-path"를 명시하여 스타일 규칙 고수
+        let pathTd = showPathColumn ? `<td class="col-path">${item.main}＞${item.sub}</td>` : '';
 
+        // 🌟 [교정] 모든 td 마다 정확한 클래스 명칭(col-name, col-cond 등)을 100% 매핑 주입하여 브라우저의 너비 왜곡 차단
         tr.innerHTML = `
             <td class="col-no">${idx + 1}</td> 
             <td class="col-check"><input type="checkbox" ${isChecked} onchange="toggleItem('${item.id}', this)"></td>
@@ -239,7 +241,7 @@ function renderList() {
             <td class="col-cond">${item.condition}</td>
             <td class="col-score">${item.score}</td>
             <td class="col-rw-type" style="color: ${textColor};">${item.rewardType || '-'}</td>
-            <td class="col-rw-content">${item.rewardContent || '-'}</td>
+            <td class="col-rw-content"><span class="col-rw-content-inner">${item.rewardContent || '-'}</span></td>
         `;
         listBody.appendChild(tr);
     });
