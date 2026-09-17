@@ -1,5 +1,5 @@
 // app.js - Part 1
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
+const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
@@ -53,25 +53,32 @@ async function fetchData() {
 }
 
 function handleSearchInput() {
+    // 🌟 index.html의 id="search-keyword" 인풋 상자를 정확하게 연결
     const inputElement = document.getElementById('search-keyword');
-    currentSearchQuery = inputElement.value.trim().toLowerCase();
-    renderList(); 
+    if (inputElement) {
+        currentSearchQuery = inputElement.value.trim().toLowerCase();
+        renderList(); 
+    }
 }
 
-// 🌟 [새로 추가] Clear 버튼 클릭 시 검색창 글자를 지우고 원래 필터 상태로 복귀시키는 매직 함수
+// 🌟 [전면 수정] 먹통이 되던 원인을 제거하고 확실하게 인풋창을 비워 복구하는 강제 초기화 함수
 function clearSearch() {
     const inputElement = document.getElementById('search-keyword');
-    inputElement.value = ''; // 인풋창 비우기
-    currentSearchQuery = ''; // 검색어 변수 리셋
     
-    // 만약 보상 모아보기 필터가 켜진 상태가 아니라면 원래 선택해둔 대/소분류 카테고리 텍스트 복구
+    if (inputElement) {
+        inputElement.value = ''; // 1. 물리적인 인풋창 글자 강제 삭제
+    }
+    
+    currentSearchQuery = ''; // 2. 자바스크립트 검색 필터 변수 완전 백지화
+    
+    // 3. 문구 표시판 원상 복구 연동
     if (currentRewardFilter === 'ALL') {
         document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
     } else {
         document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${currentRewardFilter}`;
     }
     
-    renderList(); // 화면 즉시 새로고침 리렌더링
+    renderList(); // 4. 전체 리스트 화면 갱신 수행
 }
 
 function selectStatusFilter(status) {
