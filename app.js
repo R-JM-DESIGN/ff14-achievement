@@ -1,5 +1,7 @@
 // app.js - Part 1
-const SHEET_URL = './data.json'; 
+// 🌟 [원상복구] 깃허브 캐시 대신 사용자님의 구글 웹앱 주소로 직접 데이터를 실시간 요청합니다.
+const GOOGLE_WEB_APP_URL = 'https://google.com';
+const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
 let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {};
@@ -10,13 +12,8 @@ let currentRewardFilters = [];
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
-// 🌟 [속도 혁명 핵심] 한 번에 다 그리지 않고 60개씩 나누어 초고속 로딩을 유도하는 가변 페이징 변수
-let displayLimit = 60; 
-let fullyFilteredItems = []; // 필터링이 완료된 최종 배열을 상시 임시 보관
-
 document.addEventListener("DOMContentLoaded", () => {
     applySavedThemeMode();
-    setupInfiniteScrollSensor(); // 🌟 스크롤 감지 센서 상시 가동
 });
 
 function applySavedThemeMode() {
@@ -62,10 +59,10 @@ function toggleThemeMode() {
 async function fetchData() {
     try {
         const res = await fetch(SHEET_URL);
-        if (!res.ok) throw new Error(`데이터 로드 오류 (상태코드: ${res.status})`);
+        if (!res.ok) throw new Error(`구글 웹 앱 응답 오류 (상태코드: ${res.status})`);
         
         const rows = await res.json();
-        if (!rows || rows.length <= 1) throw new Error("파싱할 데이터 행이 부족합니다.");
+        if (!rows || rows.length <= 1) throw new Error("시트 내부에 파싱할 데이터 행이 부족합니다.");
 
         rawData = rows.slice(1).map((row) => {
             const getVal = (colIdx) => {
@@ -90,23 +87,21 @@ async function fetchData() {
         initMenu();
         initRewardMenu(); 
         calculateTotalProgress();
-        applySavedThemeMode(); 
+        applySavedThemeMode();
     } catch (error) {
         console.error(error);
         document.getElementById('achievement-list').innerHTML = `
             <tr><td colspan="8" style="text-align: center; color: #ff4d4d; font-weight: bold; padding: 40px;">
-                최적화 데이터 캐시 파일을 로드하지 못했습니다.<br>
-                <span style="color: #aaa; font-size: 0.9em; font-weight: normal;">이유: 아직 깃허브 액션이 첫 data.json 자동 생성을 구동하기 전이거나, 파일이 누락되었습니다.</span>
+                구글 스프레드시트 데이터를 로드하지 못했습니다.<br>
+                <span style="color: #aaa; font-size: 0.9em; font-weight: normal;">이유: ${error.message}</span>
             </td></tr>`;
     }
 }
-// app.js - Part 2
 
 function handleSearchInput() {
     const inputElement = document.getElementById('search-keyword');
     if (inputElement) {
         currentSearchQuery = inputElement.value.trim().toLowerCase();
-        displayLimit = 60; // 검색어가 바뀔 때마다 페이징 한계치 초기화
         renderList(); 
     }
 }
@@ -117,14 +112,12 @@ function clearSearch() {
         inputElement.value = ''; 
     }
     currentSearchQuery = ''; 
-    displayLimit = 60;
     updatePathDisplay();
     renderList(); 
 }
 
 function selectStatusFilter(status) {
     currentStatusFilter = status;
-    displayLimit = 60; // 필터 변경 시 초기화
     document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('active'));
     if(status === 'ALL') document.getElementById('status-all').classList.add('active');
     if(status === 'UNCOMPLETED') document.getElementById('status-uncompleted').classList.add('active');
@@ -146,11 +139,11 @@ function initMenu() {
         mainGroup.appendChild(btn);
     });
 }
+// app.js - Part 2
 
 function selectMainCategory(main, btn) {
     currentMain = main;
     currentRewardFilters = []; 
-    displayLimit = 60;
     updateRewardFilterUI();
 
     document.querySelectorAll('#main-category-group button').forEach(b => b.classList.remove('active'));
@@ -173,7 +166,6 @@ function selectMainCategory(main, btn) {
 function selectSubCategory(sub, btn) {
     currentSub = sub;
     currentRewardFilters = []; 
-    displayLimit = 60;
     updateRewardFilterUI();
     
     document.querySelectorAll('#sub-category-group button').forEach(b => b.classList.remove('active'));
@@ -182,7 +174,6 @@ function selectSubCategory(sub, btn) {
     updatePathDisplay();
     renderList();
 }
-// app.js - Part 3
 
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
@@ -219,7 +210,6 @@ function selectRewardMultiFilter(type) {
         }
     }
     
-    displayLimit = 60; // 보상 다중 필터 선택 시 페이징 리셋
     updateRewardFilterUI();
     updatePathDisplay();
     renderList();
@@ -227,6 +217,7 @@ function selectRewardMultiFilter(type) {
 
 function updateRewardFilterUI() {
     const allBtn = document.getElementById('rw-btn-all');
+    
     if (currentRewardFilters.length === 0) {
         document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
         if (allBtn) allBtn.add('active');
@@ -271,23 +262,22 @@ function getRewardColor(type) {
     }
 }
 
-// 🌟 [초고속 개조] 1만 개 배열 중에서 화면 한계 수치(displayLimit)만큼만 쪼개어 그리는 지능형 렌더러
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     const thPath = document.getElementById('th-path');
     if (!listBody || !thPath) return;
     listBody.innerHTML = '';
 
-    fullyFilteredItems = [];
+    let filtered = [];
     
     if (!currentSearchQuery) {
         if (currentRewardFilters.length === 0) {
-            fullyFilteredItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
+            filtered = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         } else {
-            fullyFilteredItems = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
+            filtered = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
         }
     } else {
-        fullyFilteredItems = rawData.filter(item => {
+        filtered = rawData.filter(item => {
             const nameMatch = item.name.toLowerCase().includes(currentSearchQuery);
             const condMatch = item.condition.toLowerCase().includes(currentSearchQuery);
             const typeMatch = item.rewardType.toLowerCase().includes(currentSearchQuery);
@@ -297,9 +287,9 @@ function renderList() {
     }
 
     if (currentStatusFilter === 'UNCOMPLETED') {
-        fullyFilteredItems = fullyFilteredItems.filter(item => !checkedItems[item.id]); 
+        filtered = filtered.filter(item => !checkedItems[item.id]); 
     } else if (currentStatusFilter === 'COMPLETED') {
-        fullyFilteredItems = fullyFilteredItems.filter(item => checkedItems[item.id]);  
+        filtered = filtered.filter(item => checkedItems[item.id]);  
     }
 
     const showPathColumn = (currentRewardFilters.length > 0 || currentSearchQuery !== '');
@@ -311,16 +301,13 @@ function renderList() {
 
     const activeColspan = showPathColumn ? 8 : 7;
 
-    if (fullyFilteredItems.length === 0) {
+    if (filtered.length === 0) {
         listBody.innerHTML = `<tr><td colspan="${activeColspan}" style="text-align: center; padding: 40px; color: var(--text-color); opacity: 0.6;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
         calculateChapterProgress([]);
         return;
     }
 
-    // 🌟 1만 개 데이터가 있어도 처음엔 딱 displayLimit(60개)만 추출해서 0.01초 만에 화면 잠금 드로잉!
-    const sliceItems = fullyFilteredItems.slice(0, displayLimit);
-
-    sliceItems.forEach((item, idx) => {
+    filtered.forEach((item, idx) => {
         const tr = document.createElement('tr');
         const isChecked = checkedItems[item.id] ? 'checked' : '';
         if(isChecked) tr.classList.add('completed');
@@ -342,24 +329,11 @@ function renderList() {
     });
 
     if (currentSearchQuery || currentRewardFilters.length > 0) {
-        calculateChapterProgress(fullyFilteredItems);
+        calculateChapterProgress(filtered);
     } else {
         const currentViewItems = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         calculateChapterProgress(currentViewItems);
     }
-}
-
-// 🌟 [신규 강력 이식] 유저가 테이블 휠을 맨 아래로 내릴 때마다 백그라운드에서 다음 60개를 추가로 탑재하는 센서
-function setupInfiniteScrollSensor() {
-    window.addEventListener("scroll", () => {
-        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 150) {
-            // 보일 수 있는 남은 목록이 더 존재한다면 실행
-            if (displayLimit < fullyFilteredItems.length) {
-                displayLimit += 60; // 한계 수치를 늘리고
-                renderList(); // 화면 스크롤 끊김 없이 부드럽게 연장 추가
-            }
-        }
-    });
 }
 
 function toggleItem(id, checkbox) {
