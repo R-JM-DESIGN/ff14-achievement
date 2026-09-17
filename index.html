@@ -7,17 +7,56 @@
     <!-- 프리텐다드(Pretendard) 웹 폰트 로드 -->
     <link rel="stylesheet" as="style" crossorigin href="https://jsdelivr.net" />
     <style>
+        /* 🌟 [기본 다크 모드 색상 변수 정의] */
         :root {
             --bg-color: #121212;
             --panel-bg: #1e1e1e;
             --text-color: #e0e0e0;
+            --text-title: #ffffff;
             --accent-color: #3a86ff;
             --reward-color: #ff007f;
             --status-color: #2ec4b6; 
             --score-color: #ffb703; 
             --border-color: #333;
             --blue-completed: #16243d;  
-            --blue-text: #4ea8de;       
+            --blue-text: #a0b2d6;
+            --box-desc-bg: #1a1a1a;
+            --box-group-bg: #1a1a1a;
+            --th-bg: #1a1a1a;
+            --tr-hover: #252525;
+            --input-bg: #111;
+            --btn-default-bg: #2d2d2d;
+            --btn-hover-bg: #3d3d3d;
+            --path-text-color: #888888;
+            --cond-text-color: #b0b0b0;
+            --completed-cond-color: #7d8fa8;
+            --completed-path-color: #52637a;
+        }
+
+        /* 🌟 [라이트 모드 전환 시 교체될 실시간 색상 변수 선언] */
+        body.light-mode {
+            --bg-color: #f5f7fa;
+            --panel-bg: #ffffff;
+            --text-color: #333333;
+            --text-title: #111111;
+            --accent-color: #023e8a;
+            --reward-color: #d90429;
+            --status-color: #0096c7; 
+            --score-color: #e65c00; 
+            --border-color: #e2e8f0;
+            --blue-completed: #e6f0fa;  
+            --blue-text: #1d4ed8;
+            --box-desc-bg: #edf2f7;
+            --box-group-bg: #f8fafc;
+            --th-bg: #edf2f7;
+            --tr-hover: #f1f5f9;
+            --input-bg: #ffffff;
+            --btn-default-bg: #e2e8f0;
+            --btn-hover-bg: #cbd5e1;
+            --path-text-color: #64748b;
+            --cond-text-color: #475569;
+            --completed-cond-color: #2563eb;
+            --completed-path-color: #3b82f6;
         }
 
         body {
@@ -26,6 +65,7 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         header {
@@ -34,20 +74,47 @@
             background: var(--panel-bg);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            position: relative;
+            transition: background-color 0.3s ease;
         }
 
-        h1 { margin-top: 0; color: #fff; }
+        /* 우측 상단 플로팅 테마 스위치 스타일 */
+        .theme-switch-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .theme-btn {
+            background: var(--btn-default-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .theme-btn:hover {
+            background: var(--btn-hover-bg);
+        }
 
+        h1 { margin-top: 0; color: var(--text-title); transition: color 0.3s; }
         .description-box {
-            background: #1a1a1a;
+            background: var(--box-desc-bg);
             border-left: 4px solid var(--accent-color);
             padding: 15px 20px;
             border-radius: 4px;
             margin-bottom: 20px;
             font-size: 0.95em;
-            color: #b0b0b0;
+            color: var(--text-color);
             line-height: 1.6;
+            transition: all 0.3s;
         }
 
         .progress-container {
@@ -59,26 +126,28 @@
         .progress-box {
             flex: 1; 
             min-width: 280px;
-            background: #2a2a2a;
+            background: var(--bg-color);
             padding: 15px;
             border-radius: 6px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            transition: background-color 0.3s;
         }
         .progress-bar-bg {
-            background: #444;
+            background: var(--border-color);
             height: 12px;
             border-radius: 6px;
             overflow: hidden;
             margin-top: 8px;
+            transition: background-color 0.3s;
         }
         .progress-bar-fill {
             background: var(--accent-color);
             height: 100%;
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.3s ease, background-color 0.3s;
         }
 
         .score-display-text {
@@ -86,6 +155,7 @@
             font-weight: 800;
             margin-top: 5px;
             color: var(--score-color);
+            transition: color 0.3s;
         }
 
         .nav-section {
@@ -94,7 +164,8 @@
         }
         .filter-title {
             font-size: 0.9em;
-            color: #aaa;
+            color: var(--text-color);
+            opacity: 0.8;
             margin-bottom: 5px;
             font-weight: bold;
         }
@@ -104,11 +175,11 @@
             background: var(--panel-bg);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
+            transition: all 0.3s;
         }
         
-        /* 검색창과 버튼을 가로로 정렬해주는 묶음 스타일 */
         .search-wrapper {
             display: flex;
             gap: 10px;
@@ -117,20 +188,19 @@
         .search-input {
             flex: 1; 
             box-sizing: border-box;
-            background: #111;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
-            color: #fff;
+            color: var(--text-color);
             padding: 12px 20px;
             font-size: 1.05em;
             border-radius: 6px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
         .search-input:focus {
             border-color: var(--accent-color);
         }
         
-        /* 우측 Clear 버튼 전용 스타일 */
         .search-clear-btn {
             background: #cc444b;
             color: #fff;
@@ -154,11 +224,12 @@
             gap: 10px;
             margin-bottom: 15px;
             padding: 10px;
-            background: #1a1a1a;
+            background: var(--box-group-bg);
             border-radius: 6px;
+            transition: background-color 0.3s;
         }
         button {
-            background: #2d2d2d;
+            background: var(--btn-default-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
             padding: 8px 16px;
@@ -167,7 +238,7 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-        button:hover { background: #3d3d3d; }
+        button:hover { background: var(--btn-hover-bg); }
         button.active {
             background: var(--accent-color);
             color: #fff;
@@ -176,11 +247,12 @@
         button.reward-filter-btn.active {
             background: var(--reward-color);
             border-color: var(--reward-color);
+            color: #fff;
         }
         button.status-filter-btn.active {
             background: var(--status-color);
             border-color: var(--status-color);
-            color: #121212;
+            color: #fff;
             font-weight: 600;
         }
 
@@ -190,16 +262,18 @@
             background: var(--panel-bg);
             border-radius: 8px;
             overflow-x: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: background-color 0.3s;
         }
         
         .current-path {
             padding: 15px 20px;
-            background: #252525;
+            background: var(--th-bg);
             font-size: 1.1em;
             font-weight: bold;
             border-bottom: 1px solid var(--border-color);
-            color: #fff;
+            color: var(--text-title);
+            transition: all 0.3s;
         }
 
         table {
@@ -213,25 +287,25 @@
         th, td {
             padding: 14px 15px;
             border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.3s;
             box-sizing: border-box;
             white-space: normal;
             word-break: break-all;
         }
 
         th {
-            background-color: #1a1a1a;
-            color: #ffffff; 
+            background-color: var(--th-bg);
+            color: var(--text-title); 
             font-weight: 600;
         }
 
-        tr:hover { background-color: #252525; }
+        tr:hover { background-color: var(--tr-hover); }
         
         tr.completed { 
             background-color: var(--blue-completed); 
         }
         tr.completed td { 
-            color: #a0b2d6; 
+            color: var(--blue-text); 
         }
 
         .col-no { 
@@ -244,21 +318,19 @@
         }
         .col-check { width: 60px; text-align: center; }
         
-        /* 240px 분류 너비 고정 */
         .col-path { 
             width: 240px; 
             min-width: 240px;
             max-width: 240px;
             text-align: center; 
             font-size: 0.85em; 
-            color: #888888; 
+            color: var(--path-text-color); 
             white-space: nowrap; 
             overflow: hidden;
             text-overflow: clip; 
         }
-        tr.completed .col-path { color: #52637a; }
+        tr.completed .col-path { color: var(--completed-path-color); }
 
-        /* 375px 업적명 가로폭 균형 세팅 */
         .col-name { 
             width: 375px; 
             min-width: 375px;
@@ -271,10 +343,9 @@
         .col-cond { 
             width: auto; 
             font-size: 0.85em; 
-            color: #b0b0b0;
-            word-break: break-all;
+            color: var(--cond-text-color);
         }
-        tr.completed .col-cond { color: #7d8fa8; }
+        tr.completed .col-cond { color: var(--completed-cond-color); }
         
         .col-score { width: 70px; text-align: center; }
         
@@ -300,17 +371,17 @@
             cursor: pointer;
         }
 
-        /* 🌟 [새로 추가] 하단 저작권 크레딧 표시 전용 풋터 디자인 */
         footer {
             max-width: 1500px;
             margin: 40px auto 20px auto;
             text-align: center;
             font-size: 0.8em;
-            color: #666666; /* 눈에 너무 띄지 않는 차분한 회색 처리 */
+            color: #666666; 
             line-height: 1.6;
             letter-spacing: 0.03em;
-            border-top: 1px solid #252525;
+            border-top: 1px solid var(--border-color);
             padding-top: 20px;
+            transition: border-color 0.3s;
         }
         .footer-highlight {
             color: #888888;
@@ -321,6 +392,13 @@
 <body>
 
 <header>
+    <!-- 라이트/다크 실시간 제어 단추 버튼 -->
+    <div class="theme-switch-container">
+        <button id="theme-toggle-btn" class="theme-btn" onclick="toggleThemeMode()">
+            <span id="theme-icon">🌙</span> <span id="theme-text">다크 모드</span>
+        </button>
+    </div>
+
     <h1>FF14 업적 체크리스트</h1>
     
     <div class="description-box">
@@ -328,7 +406,7 @@
         - 최종 업데이트: 26. 09. 00 (ver. 7.56) <br>
         - 개인 브라우저에 저장되는 사이트입니다. 로그인이 필요하지 않으나, ip 등이 변경될 경우 정보가 사라질 수 있습니다. <br>
         - 컨텐츠에 따라 스포일러가 있을 수 있으니 열람에 주의하십시오. <br>
-        - <a href="https://guide.ff14.co.kr/" target="_blank" style="color: #4ea8de; text-decoration: underline;">한국 파판14 가이드</a>를 참고하여 제작된 사이트입니다.<br>
+        - <a href="https://ff14.co.kr" target="_blank" style="color: #4ea8de; text-decoration: underline;">한국 파판14 가이드</a>를 참고하여 제작된 사이트입니다.<br>
         - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <a href="https://tally.so" target="_blank" class="tally-popup-link">질문함</a>으로 보내주세요.<br>
     </div>
 
@@ -401,7 +479,6 @@
     </table>
 </div>
 
-<!-- 🌟 [새로 추가] 요청하신 오피셜 카피라이트 및 운영자 크레딧 영역 이식 완료 -->
 <footer>
     <div>FF14 © KOR SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</div>
     <div>FF14 © GLOBAL SQUARE ENIX CO., LTD. All Rights Reserved.</div>
