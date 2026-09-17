@@ -1,5 +1,5 @@
 // app.js - Part 1
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
+const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
@@ -10,6 +10,38 @@ let currentSub = '';
 let currentRewardFilter = 'ALL'; 
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
+
+// 🌟 [새로 추가] 브라우저에 테마 상태를 저장하고 초기 부팅 시 복원하는 실시간 이벤트 핸들러
+document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("ff14_theme_mode") || "dark";
+    if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+        document.getElementById("theme-icon").textContent = "☀️";
+        document.getElementById("theme-text").textContent = "라이트 모드";
+    } else {
+        document.body.classList.remove("light-mode");
+        document.getElementById("theme-icon").textContent = "🌙";
+        document.getElementById("theme-text").textContent = "다크 모드";
+    }
+});
+
+function toggleThemeMode() {
+    const body = document.body;
+    const icon = document.getElementById("theme-icon");
+    const text = document.getElementById("theme-text");
+
+    if (body.classList.contains("light-mode")) {
+        body.classList.remove("light-mode");
+        icon.textContent = "🌙";
+        text.textContent = "다크 모드";
+        localStorage.setItem("ff14_theme_mode", "dark");
+    } else {
+        body.classList.add("light-mode");
+        icon.textContent = "☀️";
+        text.textContent = "라이트 모드";
+        localStorage.setItem("ff14_theme_mode", "light");
+    }
+}
 
 async function fetchData() {
     try {
@@ -53,7 +85,6 @@ async function fetchData() {
 }
 
 function handleSearchInput() {
-    // 🌟 index.html의 id="search-keyword" 인풋 상자를 정확하게 연결
     const inputElement = document.getElementById('search-keyword');
     if (inputElement) {
         currentSearchQuery = inputElement.value.trim().toLowerCase();
@@ -61,24 +92,19 @@ function handleSearchInput() {
     }
 }
 
-// 🌟 [전면 수정] 먹통이 되던 원인을 제거하고 확실하게 인풋창을 비워 복구하는 강제 초기화 함수
 function clearSearch() {
     const inputElement = document.getElementById('search-keyword');
-    
     if (inputElement) {
-        inputElement.value = ''; // 1. 물리적인 인풋창 글자 강제 삭제
+        inputElement.value = ''; 
     }
+    currentSearchQuery = ''; 
     
-    currentSearchQuery = ''; // 2. 자바스크립트 검색 필터 변수 완전 백지화
-    
-    // 3. 문구 표시판 원상 복구 연동
     if (currentRewardFilter === 'ALL') {
         document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
     } else {
         document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${currentRewardFilter}`;
     }
-    
-    renderList(); // 4. 전체 리스트 화면 갱신 수행
+    renderList(); 
 }
 
 function selectStatusFilter(status) {
@@ -91,6 +117,7 @@ function selectStatusFilter(status) {
 
     renderList();
 }
+// app.js - Part 2
 
 function initMenu() {
     const mains = [...new Set(rawData.map(item => item.main))];
@@ -140,7 +167,6 @@ function selectSubCategory(sub, btn) {
     document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
     renderList();
 }
-// app.js - Part 2
 
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
@@ -184,17 +210,22 @@ function updateRewardFilterActive() {
     if(allBtn) allBtn.classList.add('active');
 }
 
+// 🌟 [라이트 모드 대응 조율] 흰 배경에서도 보상 종류 명칭이 흐려지지 않게 최적 가시 명도값 세팅
 function getRewardColor(type) {
-    if (!type || type === '-') return '#888888'; 
+    if (!type || type === '-') return '#666666'; 
+    
+    // 현재 라이트 모드가 켜져있는지 스코프 판별
+    const isLight = document.body.classList.contains("light-mode");
+    
     switch (type) {
-        case '탈것': return '#ff70a6';      
-        case '꼬마친구': return '#4ea8de';    
-        case '칭호': return '#ff9f1c';      
-        case '장비': return '#b5179e';      
-        case '가구': return '#70e000';      
-        case '초코보 갑주': return '#ffd166';  
-        case '오케스트리온': return '#48cae4'; 
-        default: return '#5bc0be';         
+        case '탈것': return isLight ? '#c71585' : '#ff70a6';      
+        case '꼬마친구': return isLight ? '#0077b6' : '#4ea8de';    
+        case '칭호': return isLight ? '#d97706' : '#ff9f1c';      
+        case '장비': return isLight ? '#86198f' : '#b5179e';      
+        case '가구': return isLight ? '#38a169' : '#70e000';      
+        case '초코보 갑주': return isLight ? '#b45309' : '#ffd166';  
+        case '오케스트리온': return isLight ? '#0369a1' : '#48cae4'; 
+        default: return isLight ? '#0f766e' : '#5bc0be';         
     }
 }
 
@@ -239,7 +270,7 @@ function renderList() {
     const activeColspan = showPathColumn ? 8 : 7;
 
     if (filtered.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="${activeColspan}" style="text-align: center; padding: 40px; color: #888;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
+        listBody.innerHTML = `<tr><td colspan="${activeColspan}" style="text-align: center; padding: 40px; color: var(--text-color); opacity: 0.6;">필터 및 검색 조건에 부합하는 업적이 없습니다.</td></tr>`;
         calculateChapterProgress([]);
         return;
     }
