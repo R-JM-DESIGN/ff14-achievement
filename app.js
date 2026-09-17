@@ -11,6 +11,7 @@ let currentRewardFilter = 'ALL';
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
+// 1. 구글 웹 앱을 통해 CORS 보안을 완벽히 우회하여 데이터 초고속 로드
 async function fetchData() {
     try {
         const res = await fetch(SHEET_URL);
@@ -19,6 +20,7 @@ async function fetchData() {
         const rows = await res.json();
         if (!rows || rows.length <= 1) throw new Error("시트 내부에 파싱할 데이터 행이 부족합니다.");
 
+        // 1만 개 이상의 데이터 구조를 객체 배열로 매핑
         rawData = rows.slice(1).map((row) => {
             const getVal = (colIdx) => {
                 return row[colIdx] !== undefined && row[colIdx] !== null ? String(row[colIdx]).trim() : '';
@@ -29,13 +31,13 @@ async function fetchData() {
 
             return {
                 id: achievementName,    
-                main: getVal(0),        
-                sub: getVal(1),         
-                name: achievementName,  
-                condition: getVal(3),   
-                score: parsedScore,     
-                rewardType: getVal(5),  
-                rewardContent: getVal(6)
+                main: getVal(0),        // A열: 대분류
+                sub: getVal(1),         // B열: 소분류
+                name: achievementName,  // C열: 업적명
+                condition: getVal(3),   // D열: 조건
+                score: parsedScore,     // E열: 점수 (정수형 변환 완료)
+                rewardType: getVal(5),  // F열: 보상 종류
+                rewardContent: getVal(6)// G열: 보상 내용
             };
         }).filter(item => item.name && item.main); 
 
@@ -52,12 +54,14 @@ async function fetchData() {
     }
 }
 
+// 2. 검색어 입력 인풋 핸들러
 function handleSearchInput() {
     const inputElement = document.getElementById('search-keyword');
     currentSearchQuery = inputElement.value.trim().toLowerCase();
     renderList(); 
 }
 
+// 3. 완료 여부 필터 변경 스위치 함수
 function selectStatusFilter(status) {
     currentStatusFilter = status;
     
@@ -69,7 +73,7 @@ function selectStatusFilter(status) {
     renderList();
 }
 
-// 메뉴 구성 컨트롤러
+// 4. 대분류 / 소분류 메뉴 제어
 function initMenu() {
     const mains = [...new Set(rawData.map(item => item.main))];
     const mainGroup = document.getElementById('main-category-group');
@@ -120,6 +124,7 @@ function selectSubCategory(sub, btn) {
 }
 // app.js - Part 2
 
+// 5. 보상 종류별 모아보기 필터 버튼 동적 생성
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
     const rewardGroup = document.getElementById('reward-category-group');
@@ -162,6 +167,7 @@ function updateRewardFilterActive() {
     if(allBtn) allBtn.classList.add('active');
 }
 
+// 보상 명칭별 글자 색상 자동 분기
 function getRewardColor(type) {
     if (!type || type === '-') return '#888888'; 
     switch (type) {
@@ -176,6 +182,7 @@ function getRewardColor(type) {
     }
 }
 
+// 6. 복합 조건 연산 스코프에 맞춰 업적 리스트 테이블 출력
 function renderList() {
     const listBody = document.getElementById('achievement-list');
     listBody.innerHTML = '';
@@ -234,6 +241,7 @@ function renderList() {
     calculateChapterProgress(filtered);
 }
 
+// 7. 체크박스 저장 핸들러
 function toggleItem(id, checkbox) {
     const row = checkbox.closest('tr');
     if (checkbox.checked) {
@@ -260,7 +268,7 @@ function toggleItem(id, checkbox) {
     }
 }
 
-// 🌟 [수정] 분모(최대 도달값) 연산을 제거하고 유저가 순수하게 획득한 누적 점수만 산출
+// 8. 🌟 [에러 완벽 조치] 사라진 html 태그(#score-max, #score-bar)를 제어하려던 잔여 연산 코드를 완벽히 숙청했습니다.
 function calculateTotalProgress() {
     const total = rawData.length;
     if(total === 0) return;
@@ -272,7 +280,7 @@ function calculateTotalProgress() {
     document.getElementById('total-count').textContent = `${checkedCount}/${total}`;
     document.getElementById('total-bar').style.width = `${percent}%`;
 
-    // 🌟 상호배타적 조건을 반영하여 오직 현재 체크된 순수 획득 누적 점수만 갱신
+    // 오직 실존하는 현재 누적 획득 점수 상자(#score-total)만 갱신합니다. (안전 보장)
     const myScore = rawData.filter(item => checkedItems[item.id]).reduce((acc, item) => acc + item.score, 0);
     document.getElementById('score-total').textContent = `${myScore.toLocaleString()} 점`;
 }
