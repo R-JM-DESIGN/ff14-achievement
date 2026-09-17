@@ -1,6 +1,5 @@
 // app.js - Part 1
-// 🌟 사용자님의 실제 구글 웹 앱 주소를 최상단에 영구 고정했습니다.
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwNb8IjqEgioNPBaCCQiGtd7pKEfMpNr6uOrj2j3WOXq6--DhNQyThpYLCy3uJuUYvd/exec';
+const GOOGLE_WEB_APP_URL = 'https://google.com';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 let rawData = [];
@@ -147,7 +146,7 @@ function initRewardMenu() {
     });
 }
 
-// 🌟 보상 종류별 필터 클릭 시 상단 타이틀 문구 단축 완료 ([필터] 종류 : 탈것)
+// 🌟 [수정] 보상 종류별 필터 클릭 시 상단 안내 경로 문구에서 '모음' 글자 완벽하게 제거 완료
 function selectRewardFilter(type, btn) {
     currentRewardFilter = type;
     
@@ -158,6 +157,7 @@ function selectRewardFilter(type, btn) {
         document.getElementById('current-path-display').textContent = `${currentMain} ＞ ${currentSub}`;
     } else {
         document.querySelectorAll('#main-category-group button, #sub-category-group button').forEach(b => b.classList.remove('active'));
+        // 👈 기존 '🎁 [필터] 종류 : 칭호 모음' 에서 영구적으로 '🎁 [필터] 종류 : 칭호' 양식으로 단축 완료!
         document.getElementById('current-path-display').textContent = `🎁 [필터] 종류 : ${type}`; 
     }
     renderList();
@@ -316,5 +316,4 @@ function calculateChapterProgress(currentItems) {
     document.getElementById('chapter-bar').style.width = `${percent}%`;
 }
 
-// 초기 구동 시작
 fetchData();
