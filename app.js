@@ -1,6 +1,6 @@
 // app.js - Part 1
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-kQGaE1a_3qFcc8jD3ZytF-m-a_63-__i9scW7LQFRQ9CW8cpXMDwoJwzwS_3PU_x/exec';
-const SHEET_URL = GOOGLE_WEB_APP_URL; 
+// 🌟 깃허브 액션이 매시간 갱신해 두는 100KB짜리 초경량 캐시 파일 주소를 다이렉트로 바라봅니다.
+const SHEET_URL = './data.json'; 
 
 let rawData = [];
 let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {};
@@ -8,11 +8,12 @@ let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {
 let currentMain = '';
 let currentSub = '';
 
-// 🌟 [핵심 변경] 단일 문자열 변수에서 선택된 보상들을 담는 '배열(Array)' 구조로 전면 업그레이드
+// 보상 종류별 다중 토글 중복 선택 배열 정의
 let currentRewardFilters = []; 
 let currentStatusFilter = 'ALL'; 
 let currentSearchQuery = ''; 
 
+// 브라우저 돔 로딩 시 테마 환경 기억 제어 센서 장치
 document.addEventListener("DOMContentLoaded", () => {
     applySavedThemeMode();
 });
@@ -60,10 +61,10 @@ function toggleThemeMode() {
 async function fetchData() {
     try {
         const res = await fetch(SHEET_URL);
-        if (!res.ok) throw new Error(`구글 웹 앱 응답 오류 (상태코드: ${res.status})`);
+        if (!res.ok) throw new Error(`데이터 로드 오류 (상태코드: ${res.status})`);
         
         const rows = await res.json();
-        if (!rows || rows.length <= 1) throw new Error("시트 내부에 파싱할 데이터 행이 부족합니다.");
+        if (!rows || rows.length <= 1) throw new Error("파싱할 데이터 행이 부족합니다.");
 
         rawData = rows.slice(1).map((row) => {
             const getVal = (colIdx) => {
@@ -88,16 +89,17 @@ async function fetchData() {
         initMenu();
         initRewardMenu(); 
         calculateTotalProgress();
-        applySavedThemeMode();
+        applySavedThemeMode(); 
     } catch (error) {
         console.error(error);
         document.getElementById('achievement-list').innerHTML = `
             <tr><td colspan="8" style="text-align: center; color: #ff4d4d; font-weight: bold; padding: 40px;">
-                구글 스프레드시트 데이터를 로드하지 못했습니다.<br>
-                <span style="color: #aaa; font-size: 0.9em; font-weight: normal;">이유: ${error.message}</span>
+                최적화 데이터 캐시 파일을 로드하지 못했습니다.<br>
+                <span style="color: #aaa; font-size: 0.9em; font-weight: normal;">이유: 아직 깃허브 액션이 첫 data.json 자동 생성을 구동하기 전이거나, 파일이 누락되었습니다.</span>
             </td></tr>`;
     }
 }
+// app.js - Part 2
 
 function handleSearchInput() {
     const inputElement = document.getElementById('search-keyword');
@@ -143,7 +145,7 @@ function initMenu() {
 
 function selectMainCategory(main, btn) {
     currentMain = main;
-    currentRewardFilters = []; // 🌟 대분류 선택 시 보상 다중 필터 초기화
+    currentRewardFilters = []; 
     updateRewardFilterUI();
 
     document.querySelectorAll('#main-category-group button').forEach(b => b.classList.remove('active'));
@@ -165,7 +167,7 @@ function selectMainCategory(main, btn) {
 
 function selectSubCategory(sub, btn) {
     currentSub = sub;
-    currentRewardFilters = []; // 🌟 소분류 선택 시 보상 다중 필터 초기화
+    currentRewardFilters = []; 
     updateRewardFilterUI();
     
     document.querySelectorAll('#sub-category-group button').forEach(b => b.classList.remove('active'));
@@ -174,7 +176,7 @@ function selectSubCategory(sub, btn) {
     updatePathDisplay();
     renderList();
 }
-// app.js - Part 2
+// app.js - Part 3
 
 function initRewardMenu() {
     const rewardTypes = [...new Set(rawData.map(item => item.rewardType))].filter(t => t && t !== '-');
@@ -198,18 +200,15 @@ function initRewardMenu() {
     });
 }
 
-// 🌟 [핵심 신규 추가] 보상을 누를 때마다 배열에 넣고 빼는 중복 토글 알고리즘 가동
 function selectRewardMultiFilter(type) {
     if (type === 'ALL') {
-        currentRewardFilters = []; // 필터 해제 버튼 클릭 시 배열 비우기
+        currentRewardFilters = []; 
     } else {
         const index = currentRewardFilters.indexOf(type);
         if (index > -1) {
-            currentRewardFilters.splice(index, 1); // 이미 켜져있으면 배열에서 제거 (해제)
+            currentRewardFilters.splice(index, 1); 
         } else {
-            currentRewardFilters.push(type); // 꺼져있으면 배열에 추가 (중복 선택)
-            
-            // 보상 필터가 하나라도 켜지면 대/소분류 탭 상단 불빛은 단정하게 해제
+            currentRewardFilters.push(type); 
             document.querySelectorAll('#main-category-group button, #sub-category-group button').forEach(b => b.classList.remove('active'));
         }
     }
@@ -219,17 +218,14 @@ function selectRewardMultiFilter(type) {
     renderList();
 }
 
-// 🌟 [핵심 신규 추가] 현재 배열 상태를 분석하여 불빛(active) 클래스를 실시간 분배하는 UI 동기화 함수
 function updateRewardFilterUI() {
     const allBtn = document.getElementById('rw-btn-all');
     
     if (currentRewardFilters.length === 0) {
-        // 켜진 필터가 없으면 '필터 해제'에 불빛 점등
         document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
         if (allBtn) allBtn.classList.add('active');
     } else {
-        if (allBtn) allBtn.classList.remove('active');
-        // 배열에 이름이 있는 보상 단추들만 찾아서 active 불빛 점등
+        if (allBtn) allBtn.remove('active');
         document.querySelectorAll('.reward-filter-btn').forEach(btn => {
             const type = btn.getAttribute('data-reward-type');
             if (currentRewardFilters.includes(type)) {
@@ -241,7 +237,6 @@ function updateRewardFilterUI() {
     }
 }
 
-// 🌟 [핵심 신규 추가] 중복 선택된 카테고리 현황을 상단 텍스트바에 이쁘게 출력해주는 장치
 function updatePathDisplay() {
     const display = document.getElementById('current-path-display');
     if (!display) return;
@@ -280,10 +275,8 @@ function renderList() {
     
     if (!currentSearchQuery) {
         if (currentRewardFilters.length === 0) {
-            // 보상 필터가 없으면 대분류 + 소분류 매칭 조회
             filtered = rawData.filter(item => item.main === currentMain && item.sub === currentSub);
         } else {
-            // 🌟 [수정] 내 시트 데이터의 보상 종류가 currentRewardFilters 배열에 '하나라도 포함(Includes)'되어 있다면 매칭 통과 처리
             filtered = rawData.filter(item => currentRewardFilters.includes(item.rewardType));
         }
     } else {
@@ -302,7 +295,6 @@ function renderList() {
         filtered = filtered.filter(item => checkedItems[item.id]);  
     }
 
-    // 🌟 보상 다중 필터가 하나라도 켜져있거나 검색 상태일 때 '분류' 헤더 열 정밀 노출
     const showPathColumn = (currentRewardFilters.length > 0 || currentSearchQuery !== '');
     if (showPathColumn) {
         thPath.style.display = ''; 
@@ -339,7 +331,6 @@ function renderList() {
         listBody.appendChild(tr);
     });
 
-    // 만약 보상 다중 필터 상태이거나 검색 상태라면 하단 진행바 분모 개수 자동 리컴퓨팅 연계
     if (currentSearchQuery || currentRewardFilters.length > 0) {
         calculateChapterProgress(filtered);
     } else {
