@@ -31,6 +31,8 @@
             --cond-text-color: #b0b0b0;
             --completed-cond-color: #7d8fa8;
             --completed-path-color: #52637a;
+            --top-btn-bg: #3a86ff;
+            --top-btn-text: #ffffff;
         }
 
         /* 🌟 [라이트 모드 전환 시 교체될 실시간 색상 변수 선언] */
@@ -57,6 +59,8 @@
             --cond-text-color: #475569;
             --completed-cond-color: #2563eb;
             --completed-path-color: #3b82f6;
+            --top-btn-bg: #023e8a;
+            --top-btn-text: #ffffff;
         }
 
         body {
@@ -66,6 +70,7 @@
             margin: 0;
             padding: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
+            scroll-behavior: smooth; /* 🌟 클릭 시 부드럽게 위로 올라가는 애니메이션 속성 */
         }
 
         header {
@@ -102,6 +107,40 @@
         }
         .theme-btn:hover {
             background: var(--btn-hover-bg);
+        }
+
+        /* 🌟 [새로 추가] 우측 하단 고정 스크롤 추적형 TOP 버튼 스타일 */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            background-color: var(--top-btn-bg);
+            color: var(--top-btn-text);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            opacity: 0; /* 🌟 처음에는 투명하게 숨김 */
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.2s ease;
+            z-index: 999; /* 최상단 레이어 보장 */
+        }
+        .scroll-top-btn.show {
+            opacity: 1; /* 🌟 스크롤이 내려가면 활성화 */
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .scroll-top-btn:hover {
+            transform: translateY(-4px); /* 마우스 올리면 살짝 위로 이동 효과 */
+            filter: brightness(1.1);
         }
 
         h1 { margin-top: 0; color: var(--text-title); transition: color 0.3s; }
@@ -392,7 +431,7 @@
 <body>
 
 <header>
-    <!-- 🌟 라이트/다크 실시간 제어 단추 버튼 -->
+    <!-- 라이트/다크 실시간 제어 단추 버튼 -->
     <div class="theme-switch-container">
         <button id="theme-toggle-btn" class="theme-btn" onclick="toggleThemeMode()">
             <span id="theme-icon">🌙</span> <span id="theme-text">다크 모드</span>
@@ -407,7 +446,7 @@
         - 개인 브라우저에 저장되는 사이트입니다. 로그인이 필요하지 않으나, ip 등이 변경될 경우 정보가 사라질 수 있습니다. <br>
         - 컨텐츠에 따라 스포일러가 있을 수 있으니 열람에 주의하십시오. <br>
         - <a href="https://ff14.co.kr" target="_blank" style="color: #4ea8de; text-decoration: underline;">한국 파판14 가이드</a>를 참고하여 제작된 사이트입니다.<br>
-        - 오타·잘못된 정보 제보, 이외 문의·건의 사항은 <a href="https://tally.so" target="_blank" class="tally-popup-link">질문함</a>으로 보내주세요.<br>
+        - 오타, 잘못된 정보 확인, 이외 문의·건의 사항은 <a href="https://tally.so" target="_blank" class="tally-popup-link">질문함</a>으로 보내주세요.<br>
     </div>
 
     <div class="progress-container">
@@ -484,6 +523,34 @@
     <div>FF14 © GLOBAL SQUARE ENIX CO., LTD. All Rights Reserved.</div>
     <div class="footer-highlight">FF14 Achievement © 검력</div>
 </footer>
+
+<!-- 🌟 [새로 추가] 스크롤 유동형 TOP 버튼 태그 배치 -->
+<button id="btn-back-to-top" class="scroll-top-btn" onclick="scrollToTopHead()">▲</button>
+
+<script>
+    // 🌟 [새로 추가] 사용자가 스크롤을 아래로 300px 이상 내리면 TOP 버튼을 서서히 나타나게 제어하는 센서 엔진
+    const topButton = document.getElementById("btn-back-to-top");
+
+    window.onscroll = function() {
+        scrollTrackingSensor();
+    };
+
+    function scrollTrackingSensor() {
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            topButton.classList.add("show");
+        } else {
+            topButton.classList.remove("show");
+        }
+    }
+
+    // 🌟 [새로 추가] TOP 버튼 클릭 시 최상단 헤드로 리다이렉트 스크롤링해 주는 제어 함수
+    function scrollToTopHead() {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth" /* 부드러운 스크롤 기동 */
+        });
+    }
+</script>
 
 <script src="app.js"></script>
 </body>
