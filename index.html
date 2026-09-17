@@ -16,8 +16,8 @@
             --status-color: #2ec4b6; 
             --score-color: #ffb703; 
             --border-color: #333;
-            
             --blue-completed: #16243d;  
+            --blue-text: #4ea8de;       
         }
 
         body {
@@ -81,7 +81,6 @@
             transition: width 0.3s ease;
         }
 
-        /* 🌟 점수 디스플레이 전용 텍스트 스타일 */
         .score-display-text {
             font-size: 1.4em;
             font-weight: 800;
@@ -182,7 +181,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 1250px;
+            min-width: 1350px;
         }
 
         th, td {
@@ -212,15 +211,20 @@
         .col-rw-content { width: 170px; font-weight: normal; text-align: center; }
         .col-name { width: 288px; font-weight: bold; text-align: center; } 
         
+        .col-path { 
+            width: 180px; 
+            text-align: center; 
+            font-size: 0.85em; 
+            color: #888888; 
+        }
+        tr.completed .col-path { color: #52637a; }
+
         .col-cond { 
             width: auto; 
             font-size: 0.85em; 
             color: #b0b0b0;
         }
-        
-        tr.completed .col-cond {
-            color: #7d8fa8;
-        }
+        tr.completed .col-cond { color: #7d8fa8; }
         
         .col-rw-type { 
             width: 104px; 
@@ -228,7 +232,7 @@
             text-align: center; 
         }
         
-        th.col-no, th.col-check, th.col-name, th.col-cond, th.col-score, th.col-rw-type, th.col-rw-content {
+        th.col-no, th.col-check, th.col-path, th.col-name, th.col-cond, th.col-score, th.col-rw-type, th.col-rw-content {
             text-align: center;
         }
 
@@ -255,7 +259,6 @@
       <a href="https://carbuncleplushy.com" target="_blank" style="color: #4ea8de; text-decoration: underline;">질문함</a>으로 보내주세요.<br>
 </div>
 
-
     <div class="progress-container">
         <div class="progress-box">
             <div>전체 달성도: <span id="total-percent">0%</span> (<span id="total-count">0/0</span>)</div>
@@ -265,7 +268,6 @@
             <div>현재 필터 달성도: <span id="chapter-percent">0%</span> (<span id="chapter-count">0/0</span>)</div>
             <div class="progress-bar-bg"><div id="chapter-bar" class="progress-bar-fill" style="background: #2ec4b6;"></div></div>
         </div>
-        <!-- 🌟 [수정] 목표 한도 수치와 프로그레스 바를 빼고 내 순수 획득 점수만 깔끔하게 노출 -->
         <div class="progress-box">
             <div>현재 누적 획득 점수</div>
             <div id="score-total" class="score-display-text">0 점</div>
@@ -303,6 +305,7 @@
             <tr>
                 <th class="col-no">NO</th>
                 <th class="col-check">완료</th>
+                <th class="col-path">분류</th>
                 <th class="col-name">업적명</th>
                 <th class="col-cond">조건</th>
                 <th class="col-score">점수</th>
@@ -312,7 +315,7 @@
         </thead>
         <tbody id="achievement-list">
             <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: #888;">데이터를 불러오는 중입니다...</td>
+                <td colspan="8" style="text-align: center; padding: 40px; color: #888;">데이터를 불러오는 중입니다...</td>
             </tr>
         </tbody>
     </table>
