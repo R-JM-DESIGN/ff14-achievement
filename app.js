@@ -4,19 +4,24 @@
 const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-kQGaE1a_3qFcc8jD3ZytF-m-a_63-__i9scW7LQFRQ9CW8cpXMDwoJwzwS_3PU_x/exec';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
-// 🎯 [오류 영구 파쇄 완결] 누락되었던 로컬 스토리지 공통 이름표 상수를 최선단에 명확하게 신설 정의합니다.
+// 🎯 [오류 영구 파쇄 완결] 로컬 스토리지 데이터 무결성을 보장하는 전역 공통 이름표 상수입니다.
 const STORAGE_KEY = 'ff14_achievements_v2';
 
-// [순정 구조 복원] 수집된 업적 원본 배열과 9번째 줄 에러를 해결하여 상수를 연동 호출합니다.
+// [순정 구조 보존] 구글 시트 레코드와 로컬스토리지 완료 키 데이터를 메모리에 매핑합니다.
 let rawData = [];
-let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; // 상수를 안정적으로 바라보도록 연동 매핑
+let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; 
 
-// [상태 변수 관리 변수 스코프] 필터링 및 복합 연산에 연동되는 글로벌 제어 인덱스 목록입니다.
+// [상태 제어 스코프] 다중 교차 필터링 및 라이브 연산에 연동되는 실시간 전역 상태 인덱스입니다.
 let currentMain = '';            // 대분류 카테고리 기록용 변수
 let currentSub = '';             // 소분류 카테고리 기록용 변수
 let currentRewardFilters = [];   // 보상 아이템 다중 토글 누적 저장용 배열 변수
 let currentStatusFilter = 'ALL'; // 달성 상태 필터 기록용 변수 (ALL / 미완료 / 완료)
 let currentSearchQuery = '';     // 통합 검색 키워드 실시간 소문자 저장용 변수
+
+// [브라우저 돔 리스너] 마크업 스캔 완료 타이밍에 영구 저장된 테마를 호출합니다.
+document.addEventListener("DOMContentLoaded", () => {
+    applySavedThemeMode();
+});
 
 /**
  * ------------------------------------------------------------------------------
@@ -94,7 +99,7 @@ async function fetchData() {
                 main: getVal(0),        
                 sub: getVal(1),         
                 name: achievementName,  
-                condition: getVal(3),   
+                condition: getVal(3),   // D열: 획득 방법 본문 저장
                 score: parsedScore,     
                 rewardType: getVal(5),  
                 rewardContent: getVal(6)
@@ -128,7 +133,6 @@ function handleSearchInput() {
     }
 }
 
-// 🎯 [기획 요약 수선 구현] 타자 친 글자 물리 강제 완전 대청소 및 화면 즉시 복원 연동
 function clearSearch() {
     const inputElement = document.getElementById('search-keyword');
     if (inputElement) {
@@ -167,7 +171,7 @@ function initMenu() {
 }
 
 // app.js - Part 2
-// 원본 주석 라인 구조를 그대로 승계하여 보존 분할합니다.
+// 순정 구분선 주석 동질 유지
 
 function selectMainCategory(main, btn) {
     currentMain = main;
@@ -242,15 +246,14 @@ function selectRewardMultiFilter(type) {
     renderList();           
 }
 
-// 🎯 [오타 전면 치료 수선 완결] 원본의 치명적인 구동 에러(add, remove 자리에 classList 미주입 현상)를 완벽히 수정 처치했습니다.
 function updateRewardFilterUI() {
     const allBtn = document.getElementById('rw-btn-all');
     
     if (currentRewardFilters.length === 0) {
         document.querySelectorAll('.reward-filter-btn').forEach(b => b.classList.remove('active'));
-        if (allBtn) allBtn.classList.add('active'); // classList.add 정밀 수선
+        if (allBtn) allBtn.classList.add('active'); 
     } else {
-        if (allBtn) allBtn.classList.remove('active'); // classList.remove 정밀 수선
+        if (allBtn) allBtn.classList.remove('active'); 
         document.querySelectorAll('.reward-filter-btn').forEach(btn => {
             const type = btn.getAttribute('data-reward-type');
             if (currentRewardFilters.includes(type)) {
@@ -344,12 +347,23 @@ function renderList() {
         const textColor = getRewardColor(item.rewardType);
         let pathTd = showPathColumn ? `<td class="col-path">${item.main}＞${item.sub}</td>` : '';
 
+        // 🌟 [대괄호 탐색 기반 엔터 개행 및 폰트 축소 인젝션 알고리즘]
+        let formattedWay = item.condition || '-';
+        if (formattedWay.includes('[')) {
+            const bracketIndex = formattedWay.indexOf('[');
+            const frontText = formattedWay.substring(0, bracketIndex).trim(); // 대괄호 앞 원본 본문
+            const bracketText = formattedWay.substring(bracketIndex).trim();  // 대괄호를 포함한 뒷부분 전부
+            
+            // 대괄호 앞에서 강제 엔터(<br>)를 치고, 뒷부분 글자 크기를 은은하게 0.83em으로 낮춘 레이아웃 결합
+            formattedWay = `${frontText}<br><span style="display: block; font-size: 0.83em; color: var(--text-muted); font-weight: normal; margin-top: 3px;">${bracketText}</span>`;
+        }
+
         tr.innerHTML = `
             <td class="col-no">${idx + 1}</td> 
             <td class="col-check"><input type="checkbox" ${isChecked} onchange="toggleItem('${item.id}', this)"></td>
             ${pathTd}
             <td class="col-name">${item.name}</td>
-            <td class="col-cond">${item.condition}</td>
+            <td class="col-way">${formattedWay}</td> 
             <td class="col-score">${item.score}</td>
             <td class="col-rw-type" style="color: ${textColor}; font-weight:bold;">${item.rewardType || '-'}</td>
             <td class="col-rw-content">${item.rewardContent || '-'}</td>
@@ -375,7 +389,7 @@ function toggleItem(id, checkbox) {
         row.classList.remove('completed');
     }
     
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems)); // 수정된 보존 상수를 바인딩 적용
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems)); 
     calculateTotalProgress();
 
     if (currentStatusFilter !== 'ALL' || currentSearchQuery || currentRewardFilters.length > 0) {
@@ -386,6 +400,7 @@ function toggleItem(id, checkbox) {
     }
 }
 
+// 전체 달성 수치 대시보드 누적 계산
 function calculateTotalProgress() {
     const total = rawData.length;
     if(total === 0) return;
@@ -408,7 +423,6 @@ function calculateChapterProgress(currentItems) {
     else if (currentRewardFilters.length > 0) document.getElementById('chapter-percent').parentElement.firstChild.textContent = "선택 보상 달성도: ";
     else document.getElementById('chapter-percent').parentElement.firstChild.textContent = "현재 소분류 달성도: ";
 
-    // 🌟 [게이지 버그 격파 완결] 초동 비동기 진입 시 분모 동결 현상을 방지하고자 수량을 원본 데이터 풀에서 실시간 전수 추산합니다.
     let exactTotal = total;
     if (exactTotal === 0 && currentMain && currentSub && !currentSearchQuery && currentRewardFilters.length === 0) {
         exactTotal = rawData.filter(item => item.main === currentMain && item.sub === currentSub).length;
@@ -428,29 +442,21 @@ function calculateChapterProgress(currentItems) {
     document.getElementById('chapter-bar').style.width = `${percent}%`;
 }
 
-/**
- * ==============================================================================
- * 🚀 [무결성 순차 제어 아키텍처 및 2단 연쇄 자동 클릭 물리 트리거 엔진 신설]
- * ==============================================================================
- * 🌟 두 번째 파일의 초고속 공식인 프로미스 파이프라인 구조를 전면 이식 완료했습니다.
- * 브라우저 전체 스캔본 해석이 끝나는 시점에 구글 시트 레코드 데이터를 100% 온전히 받아온 뒤에만
- * 대분류 '전투'와 그 하위 소분류 '일반' 단추를 대리 순차 물리 클릭하도록 연동하여 무한 로딩을 영구 분쇄합니다.
- */
 document.addEventListener('DOMContentLoaded', () => {
     fetchData().then(() => {
-        updatePathDisplay(); // 경로 출력 초기 가동
+        updatePathDisplay(); 
 
         const mainButtons = document.querySelectorAll('#main-category-group button');
         const targetMainBtn = Array.from(mainButtons).find(btn => btn.textContent.trim() === '전투');
 
         if (targetMainBtn) {
-            targetMainBtn.click(); // 대분류 '전투' 연쇄 자동 실행
+            targetMainBtn.click(); 
 
             const subButtons = document.querySelectorAll('#sub-category-group button');
             const targetSubBtn = Array.from(subButtons).find(btn => btn.textContent.trim() === '일반');
 
             if (targetSubBtn) {
-                targetSubBtn.click(); // 소분류 '일반' 연쇄 오토 피니시 클릭 완결!
+                targetSubBtn.click(); 
             } else {
                 if (subButtons.length > 0) subButtons[0].click();
             }
