@@ -6,7 +6,7 @@ const SHEET_URL = GOOGLE_WEB_APP_URL;
 
 // [원본 상태 유지 변수] 수집된 업적 원본 배열과 로컬스토리지 완료 키 데이터를 선언합니다.
 let rawData = [];
-let checkedItems = JSON.parse(localStorage.getItem('ff14_achievements_v2')) || {};
+let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; // 2. 글자 대신 STORAGE_KEY 적용
 
 // [원본 상태 유지 변수] 필터링 및 복합 연산에 연동되는 글로벌 제어 인덱스 목록입니다.
 let currentMain = '';            // 대분류 카테고리 기록용 변수
@@ -438,7 +438,7 @@ function toggleItem(id, checkbox) {
         row.classList.remove('completed');
     }
     
-    localStorage.setItem('ff14_achievements_v2', JSON.stringify(checkedItems));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems)); // 3. 글자 대신 STORAGE_KEY 적용
     calculateTotalProgress();
 
     if (currentStatusFilter !== 'ALL' || currentSearchQuery || currentRewardFilters.length > 0) {
