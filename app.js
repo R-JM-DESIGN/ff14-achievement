@@ -10,7 +10,7 @@
  */
 
 // 1. [수선 완료] 두 번째 파일의 무결성 구글 웹 앱 API 고속 연동 주소를 이식 고정합니다.
-const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby_Cb18OxVCoIUgdc6p0tZ75nZEXtXBWoS-4Vms5Aly8pq_QIFkB4SzBZzMj0e7av7V/exec';
+const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-kQGaE1a_3qFcc8jD3ZytF-m-a_63-__i9scW7LQFRQ9CW8cpXMDwoJwzwS_3PU_x/exec';
 const SHEET_URL = GOOGLE_WEB_APP_URL; 
 
 // 2. 가동에 필요한 전역 변수(인스턴스 상태 저장소) 그룹 개설
